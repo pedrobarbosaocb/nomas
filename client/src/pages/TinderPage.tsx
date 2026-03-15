@@ -29,15 +29,19 @@ export default function TinderPage() {
 
   const handleLike = () => {
     if (currentApartment) {
-      toggleLike(currentApartment.link);
-      handleNext();
+      toggleLike(currentApartment.id);
+      if (currentIndex === notRatedApartments.length - 1) {
+        setCurrentIndex(Math.max(0, currentIndex - 1));
+      }
     }
   };
 
   const handleDislike = () => {
     if (currentApartment) {
-      toggleDislike(currentApartment.link);
-      handleNext();
+      toggleDislike(currentApartment.id);
+      if (currentIndex === notRatedApartments.length - 1) {
+        setCurrentIndex(Math.max(0, currentIndex - 1));
+      }
     }
   };
 
@@ -59,6 +63,8 @@ export default function TinderPage() {
     );
   }
 
+  const evaluatedCount = apartments.length - notRatedApartments.length;
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
       {/* Header */}
@@ -67,7 +73,7 @@ export default function TinderPage() {
           Avalie Apartamentos
         </h1>
         <p className="text-gray-600">
-          {currentIndex + 1} de {notRatedApartments.length}
+          {evaluatedCount} de {apartments.length} avaliados
         </p>
       </div>
 
@@ -110,7 +116,7 @@ export default function TinderPage() {
         <div
           className="bg-emerald-600 h-2 rounded-full transition-all"
           style={{
-            width: `${((currentIndex + 1) / notRatedApartments.length) * 100}%`
+            width: `${(evaluatedCount / apartments.length) * 100}%`
           }}
         />
       </div>
