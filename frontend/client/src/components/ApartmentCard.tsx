@@ -1,4 +1,5 @@
-import { ThumbsUp, ThumbsDown, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ThumbsUp, ThumbsDown, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RatingStatus } from '@/hooks/useApartmentRatings';
 
 interface Apartment {
@@ -69,21 +70,109 @@ export function ApartmentCard({
   onDislike,
   variant = 'list'
 }: ApartmentCardProps) {
-  const mainImage = apartment.info.images && apartment.info.images.length > 0 
-    ? apartment.info.images[0] 
-    : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [apartment.link]);
+
+  const images = apartment.info.images && apartment.info.images.length > 0 
+    ? apartment.info.images 
+    : ['https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'];
+
+  const mainImage = images[currentImageIndex] || images[0];
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+  };
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+    } else if (isRightSwipe) {
+      setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+    }
+  };
 
   if (variant === 'tinder') {
     return (
-      <div className={`w-full max-w-md mx-auto bg-white border border-gray-200 rounded-lg shadow-lg flex flex-col h-[700px] overflow-hidden`}>
+      <div className={`w-full bg-white border border-gray-200 rounded-lg shadow-lg flex flex-col h-[calc(100vh-160px)] min-h-[400px] max-h-[600px] overflow-hidden`}>
         {/* Image Header */}
-        <div className="h-64 relative bg-gray-100 flex-shrink-0">
+        <div 
+          className="h-[40%] min-h-[200px] max-h-[320px] relative bg-gray-100 flex-shrink-0 group"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <img 
             src={mainImage} 
             alt={apartment.info.title} 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover select-none"
+            draggable={false}
           />
-          <div className="absolute top-4 left-4 right-4 flex justify-between">
+          
+          {images.length > 1 && (
+            <>
+              <div 
+                className="absolute top-0 left-0 w-1/2 h-full z-10 cursor-pointer"
+                onClick={handlePrevImage}
+              />
+              <div 
+                className="absolute top-0 right-0 w-1/2 h-full z-10 cursor-pointer"
+                onClick={handleNextImage}
+              />
+
+              <div className="absolute inset-y-0 left-2 flex items-center shrink-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="bg-black/30 text-white p-1 rounded-full backdrop-blur-sm">
+                  <ChevronLeft size={20} />
+                </div>
+              </div>
+              <div className="absolute inset-y-0 right-2 flex items-center shrink-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="bg-black/30 text-white p-1 rounded-full backdrop-blur-sm">
+                  <ChevronRight size={20} />
+                </div>
+              </div>
+
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-20 pointer-events-none px-4 flex-wrap pb-1">
+                {images.map((_, idx) => (
+                  <div 
+                    key={idx}
+                    className={`w-1.5 h-1.5 rounded-full shadow-sm transition-all ${
+                      idx === currentImageIndex ? 'bg-white w-3' : 'bg-white/60'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          <div className="absolute top-4 left-4 right-4 flex justify-between z-30 pointer-events-none">
             <span className="bg-white/90 backdrop-blur-sm text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wide text-gray-800 shadow-sm border border-gray-200/50">
               {apartment.info.source}
             </span>
@@ -178,13 +267,55 @@ export function ApartmentCard({
       'border-gray-200'
     }`}>
       {/* List Image */}
-      <div className="sm:w-48 h-48 sm:h-auto flex-shrink-0 relative">
+      <div 
+        className="sm:w-48 h-48 sm:h-auto flex-shrink-0 relative group"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <img 
           src={mainImage} 
           alt={apartment.info.title} 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover select-none"
+          draggable={false}
         />
-        <div className="absolute top-2 left-2 flex gap-1 flex-col">
+        
+        {images.length > 1 && (
+          <>
+            <div 
+              className="absolute top-0 left-0 w-1/2 h-full z-10 cursor-pointer"
+              onClick={handlePrevImage}
+            />
+            <div 
+              className="absolute top-0 right-0 w-1/2 h-full z-10 cursor-pointer"
+              onClick={handleNextImage}
+            />
+
+            <div className="absolute inset-y-0 left-1 flex items-center shrink-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="bg-black/30 text-white p-0.5 rounded-full backdrop-blur-sm">
+                <ChevronLeft size={16} />
+              </div>
+            </div>
+            <div className="absolute inset-y-0 right-1 flex items-center shrink-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="bg-black/30 text-white p-0.5 rounded-full backdrop-blur-sm">
+                <ChevronRight size={16} />
+              </div>
+            </div>
+
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-20 pointer-events-none px-2 flex-wrap pb-1">
+              {images.map((_, idx) => (
+                <div 
+                  key={idx}
+                  className={`w-1 h-1 rounded-full shadow-sm transition-all ${
+                    idx === currentImageIndex ? 'bg-white w-2' : 'bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        <div className="absolute top-2 left-2 flex gap-1 flex-col z-30 pointer-events-none">
           <span className="bg-white/90 backdrop-blur-sm text-[10px] font-bold px-2 py-1 rounded shadow-sm text-gray-800 uppercase">
             {apartment.info.source}
           </span>
