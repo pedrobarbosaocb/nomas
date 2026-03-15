@@ -29,7 +29,7 @@ export default function TinderPage() {
 
   const handleLike = () => {
     if (currentApartment) {
-      toggleLike(currentApartment.id);
+      toggleLike(currentApartment.link);
       if (currentIndex === notRatedApartments.length - 1) {
         setCurrentIndex(Math.max(0, currentIndex - 1));
       }
@@ -38,7 +38,7 @@ export default function TinderPage() {
 
   const handleDislike = () => {
     if (currentApartment) {
-      toggleDislike(currentApartment.id);
+      toggleDislike(currentApartment.link);
       if (currentIndex === notRatedApartments.length - 1) {
         setCurrentIndex(Math.max(0, currentIndex - 1));
       }
