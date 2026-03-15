@@ -12,13 +12,13 @@ export default function ListingPage() {
 
   const filteredApartments = useMemo(() => {
     if (filter === 'all') return apartments;
-    return apartments.filter(apt => getRating(apt.id) === filter);
+    return apartments.filter(apt => getRating(apt.link) === filter);
   }, [filter, getRating]);
 
   const stats = {
-    liked: apartments.filter(apt => getRating(apt.id) === 'liked').length,
-    disliked: apartments.filter(apt => getRating(apt.id) === 'disliked').length,
-    notRated: apartments.filter(apt => getRating(apt.id) === 'not-rated').length,
+    liked: apartments.filter(apt => getRating(apt.link) === 'liked').length,
+    disliked: apartments.filter(apt => getRating(apt.link) === 'disliked').length,
+    notRated: apartments.filter(apt => getRating(apt.link) === 'not-rated').length,
   };
 
   return (
@@ -109,11 +109,11 @@ export default function ListingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredApartments.map(apartment => (
               <ApartmentCard
-                key={apartment.id}
+                key={apartment.link}
                 apartment={apartment}
-                rating={getRating(apartment.id)}
-                onLike={() => toggleLike(apartment.id)}
-                onDislike={() => toggleDislike(apartment.id)}
+                rating={getRating(apartment.link)}
+                onLike={() => toggleLike(apartment.link)}
+                onDislike={() => toggleDislike(apartment.link)}
                 variant="list"
               />
             ))}

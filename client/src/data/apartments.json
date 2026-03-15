@@ -1,65 +1,70 @@
 [
   {
-    "id": "1",
-    "source": "Kijiji",
-    "title": "4 1/2 Condo | Near Namur/Plamontion Metro, high value",
-    "price": "$1,850.00",
-    "location": "Snowdon, City of Montréal",
-    "description": "4 1/2 apartment | Convenient & High-Value Condo – Near Orange Line (Namur/Plamontion) Located steps away from PA Supermarket and other amenities.",
-    "link": "https://www.kijiji.ca/v-apartments-condos/ville-de-montreal/4-1-2-condo-near-namur-plamontion-metro-high-value/1734395698"
+    "price": "$1,395.00",
+    "link": "https://www.kijiji.ca/v-apartments-condos/longueuil-rive-sud/4-1-2-vieux-longueuil-chauffage-eau-chaude-inclus/1731841064",
+    "info": {
+      "source": "Kijiji",
+      "title": "4 1/2 VIEUX-LONGUEUIL CHAUFFAGE & EAU CHAUDE INCLUS",
+      "description": "4 1/2 situé dans le Vieux-Longueuil au 435 rue Leblanc ouest.",
+      "available_date": "",
+      "images": [
+        "https://media.kijiji.ca/api/v1/ca-prod-dealer-ads/images/96/965176f7-34a0-402c-a29f-b095e6f87242?rule=kijijica-960-jpg",
+        "https://media.kijiji.ca/api/v1/ca-prod-dealer-ads/images/6b/6b97c032-0caa-4ec9-972f-097a32fac9e2?rule=kijijica-960-jpg"
+      ]
+    },
+    "location_info": {
+      "address": "435 rue Leblanc ouest",
+      "data": "45.52865, -73.49477",
+      "precision": "metadata",
+      "latitude": 45.52865,
+      "longitude": -73.49477,
+      "nearest_metro": "Longueuil-Université-de-Sherbrooke (Yellow)",
+      "distance_to_metro_km": 2.13
+    },
+    "included": {
+      "electricity": null,
+      "heating": null
+    },
+    "details": {
+      "unit_details": "",
+      "is_furnished": null,
+      "pets_allowed": null
+    },
+    "scores": {
+      "walk": "7",
+      "transit": "5",
+      "bike": "6"
+    }
   },
   {
-    "id": "2",
-    "source": "Kijiji",
-    "title": "Le Livmore [2-Bedroom] 2 Months Free Rent",
     "price": "$2,318.00",
-    "location": "Quartier-des-Spectacles, City of Montréal",
-    "description": "ENGLISH Le Livmore 1180 Rue De Bleury $500 Move-In Reward + 2 Months Free Rent Now leasing studios, 1, 2, and 3-bedroom apartments.",
-    "link": "https://www.kijiji.ca/v-room-rental-roommate/ville-de-montreal/le-livmore-2-bedroom-2-months-free-rent/1734395644"
+    "link": "https://www.kijiji.ca/v-room-rental-roommate/ville-de-montreal/le-livmore-2-bedroom-2-months-free-rent/1734395644",
+    "info": {
+      "source": "Kijiji",
+      "title": "Le Livmore [2-Bedroom] 2 Months Free Rent",
+      "description": "ENGLISH Le Livmore 1180 Rue De Bleury $500 Move-In Reward + 2 Months Free Rent Now leasing studios, 1, 2, and 3-bedroom apartments.",
+      "available_date": "",
+      "images": [
+        "https://media.kijiji.ca/api/v1/ca-prod-dealer-ads/images/a9/a9968aca-7845-4fd7-a002-dbfacb86c465?rule=kijijica-960-jpg"
+      ]
+    },
+    "location_info": {
+      "address": "1180 Rue De Bleury",
+      "nearest_metro": "Place-des-Arts (Green)"
+    }
   },
   {
-    "id": "3",
-    "source": "Kijiji",
-    "title": "LE SORELLA : Condos neufs à louer 🏢 3 x 🏢 juin/juillet 2026",
     "price": "$1,095.00",
-    "location": "Chomedey, Laval",
-    "description": "Au cœur du quartier Chomedey, le Sorella compte 291 logements dans un complexe résidentiel alliant confort, modernité et vie de qualité.",
-    "link": "https://www.kijiji.ca/v-apartments-condos/laval-rive-nord/le-sorella-condos-neufs-a-louer-3-juin-juillet-2026/1731296395"
-  },
-  {
-    "id": "4",
-    "source": "Facebook Marketplace",
-    "title": "3 and 1/2 Available from 1 April 2026 in Lasalle",
-    "price": "CA$1,100",
-    "location": "Montréal, QC",
-    "description": "3 and 1/2 Available from 1 April 2026 in Lasalle",
-    "link": "https://www.facebook.com/marketplace/item/956816310243465/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking"
-  },
-  {
-    "id": "5",
-    "source": "Facebook Marketplace",
-    "title": "Garage for Rent",
-    "price": "CA$250",
-    "location": "Montréal, QC",
-    "description": "Garage for Rent",
-    "link": "https://www.facebook.com/marketplace/item/528385323371369/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking"
-  },
-  {
-    "id": "6",
-    "source": "Facebook Marketplace",
-    "title": "MINI ENTREPÔT MONT SAINT HILAIRE",
-    "price": "CA$180",
-    "location": "Mont-St-Hilaire, QC",
-    "description": "MINI ENTREPÔT MONT SAINT HILAIRE",
-    "link": "https://www.facebook.com/marketplace/item/221212201261950/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking"
-  },
-  {
-    "id": "7",
-    "source": "Facebook Marketplace",
-    "title": "4 1/2",
-    "price": "CA$1,200",
-    "location": "Montréal, QC",
-    "description": "4 1/2 apartment available for rent",
-    "link": "https://www.facebook.com/marketplace/item/123456789/?ref=category_feed"
+    "link": "https://www.kijiji.ca/v-apartments-condos/laval-rive-nord/le-sorella-condos-neufs-a-louer-3-juin-juillet-2026/1731296395",
+    "info": {
+      "source": "Kijiji",
+      "title": "LE SORELLA : Condos neufs à louer 🏢 3 x 🏢 juin/juillet 2026",
+      "description": "Au cœur du quartier Chomedey, le Sorella compte 291 logements dans un complexe résidentiel alliant confort, modernité et vie de qualité.",
+      "available_date": "2026-06-01",
+      "images": []
+    },
+    "location_info": {
+      "address": "Chomedey, Laval"
+    }
   }
 ]

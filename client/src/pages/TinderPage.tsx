@@ -10,7 +10,7 @@ export default function TinderPage() {
 
   // Filtrar apenas apartamentos não avaliados
   const notRatedApartments = useMemo(() => {
-    return apartments.filter(apt => getRating(apt.id) === 'not-rated');
+    return apartments.filter(apt => getRating(apt.link) === 'not-rated');
   }, [getRating]);
 
   const currentApartment = notRatedApartments[currentIndex];
@@ -29,14 +29,14 @@ export default function TinderPage() {
 
   const handleLike = () => {
     if (currentApartment) {
-      toggleLike(currentApartment.id);
+      toggleLike(currentApartment.link);
       handleNext();
     }
   };
 
   const handleDislike = () => {
     if (currentApartment) {
-      toggleDislike(currentApartment.id);
+      toggleDislike(currentApartment.link);
       handleNext();
     }
   };
@@ -87,7 +87,7 @@ export default function TinderPage() {
           {currentApartment && (
             <ApartmentCard
               apartment={currentApartment}
-              rating={getRating(currentApartment.id)}
+              rating={getRating(currentApartment.link)}
               onLike={handleLike}
               onDislike={handleDislike}
               variant="tinder"
