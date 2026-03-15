@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+pyyaml
+playwright
+fastapi
+uvicorn
+sentence-transformers
+scikit-learn
+geopy

@@ -1,0 +1,9 @@
+{
+    "city": "montreal",
+    "max_price": 1500,
+    "bedrooms": 2,
+    "process_listings": true,
+    "use_embeddings": true,
+    "ai_threshold": 0.55,
+    "output_dir": "data/"
+}

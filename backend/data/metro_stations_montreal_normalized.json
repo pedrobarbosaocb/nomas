@@ -1,0 +1,806 @@
+{
+    "Orange": {
+        "Stations": [
+            {
+                "name": "Côte-Vertu",
+                "coords": [
+                    45.5144,
+                    -73.6826
+                ],
+                "name_normalized": "c te vertu"
+            },
+            {
+                "name": "Du Collège",
+                "coords": [
+                    45.5094,
+                    -73.6749
+                ],
+                "name_normalized": "du coll ge"
+            },
+            {
+                "name": "De la Savane",
+                "coords": [
+                    45.499,
+                    -73.6603
+                ],
+                "name_normalized": "de la savane"
+            },
+            {
+                "name": "Namur",
+                "coords": [
+                    45.495,
+                    -73.6521
+                ],
+                "name_normalized": "namur"
+            },
+            {
+                "name": "Plamondon",
+                "coords": [
+                    45.4957,
+                    -73.6406
+                ],
+                "name_normalized": "plamondon"
+            },
+            {
+                "name": "Côte-Sainte-Catherine",
+                "coords": [
+                    45.4924,
+                    -73.6331
+                ],
+                "name_normalized": "c te sainte catherine"
+            },
+            {
+                "name": "Snowdon",
+                "coords": [
+                    45.4855,
+                    -73.6277
+                ],
+                "name_normalized": "snowdon"
+            },
+            {
+                "name": "Villa-Maria",
+                "coords": [
+                    45.4795,
+                    -73.619
+                ],
+                "name_normalized": "villa maria"
+            },
+            {
+                "name": "Vendôme",
+                "coords": [
+                    45.474,
+                    -73.6037
+                ],
+                "name_normalized": "vend me"
+            },
+            {
+                "name": "Place-Saint-Henri",
+                "coords": [
+                    45.4773,
+                    -73.5857
+                ],
+                "name_normalized": "place saint henri"
+            },
+            {
+                "name": "Lionel-Groulx",
+                "coords": [
+                    45.4831,
+                    -73.5796
+                ],
+                "name_normalized": "lionel groulx"
+            },
+            {
+                "name": "Georges-Vanier",
+                "coords": [
+                    45.4891,
+                    -73.5771
+                ],
+                "name_normalized": "georges vanier"
+            },
+            {
+                "name": "Lucien-L'Allier",
+                "coords": [
+                    45.4947,
+                    -73.5714
+                ],
+                "name_normalized": "lucien l allier"
+            },
+            {
+                "name": "Bonaventure",
+                "coords": [
+                    45.4983,
+                    -73.5668
+                ],
+                "name_normalized": "bonaventure"
+            },
+            {
+                "name": "Square-Victoria-OACI",
+                "coords": [
+                    45.502,
+                    -73.5629
+                ],
+                "name_normalized": "square victoria oaci"
+            },
+            {
+                "name": "Place-d'Armes",
+                "coords": [
+                    45.5061,
+                    -73.5594
+                ],
+                "name_normalized": "place d armes"
+            },
+            {
+                "name": "Champ-de-Mars",
+                "coords": [
+                    45.5102,
+                    -73.5562
+                ],
+                "name_normalized": "champ de mars"
+            },
+            {
+                "name": "Berri-UQAM",
+                "coords": [
+                    45.5155,
+                    -73.5611
+                ],
+                "name_normalized": "berri uqam"
+            },
+            {
+                "name": "Sherbrooke",
+                "coords": [
+                    45.5186,
+                    -73.5683
+                ],
+                "name_normalized": "sherbrooke"
+            },
+            {
+                "name": "Mont-Royal",
+                "coords": [
+                    45.5244,
+                    -73.5818
+                ],
+                "name_normalized": "mont royal"
+            },
+            {
+                "name": "Laurier",
+                "coords": [
+                    45.5276,
+                    -73.5882
+                ],
+                "name_normalized": "laurier"
+            },
+            {
+                "name": "Rosemont",
+                "coords": [
+                    45.5312,
+                    -73.5976
+                ],
+                "name_normalized": "rosemont"
+            },
+            {
+                "name": "Beaubien",
+                "coords": [
+                    45.535,
+                    -73.6046
+                ],
+                "name_normalized": "beaubien"
+            },
+            {
+                "name": "Jean-Talon",
+                "coords": [
+                    45.5398,
+                    -73.6134
+                ],
+                "name_normalized": "jean talon"
+            },
+            {
+                "name": "Jarry",
+                "coords": [
+                    45.5434,
+                    -73.6231
+                ],
+                "name_normalized": "jarry"
+            },
+            {
+                "name": "Crémazie",
+                "coords": [
+                    45.5461,
+                    -73.6384
+                ],
+                "name_normalized": "cr mazie"
+            },
+            {
+                "name": "Sauvé",
+                "coords": [
+                    45.5507,
+                    -73.6565
+                ],
+                "name_normalized": "sauv"
+            },
+            {
+                "name": "Henri-Bourassa",
+                "coords": [
+                    45.5552,
+                    -73.6675
+                ],
+                "name_normalized": "henri bourassa"
+            },
+            {
+                "name": "Cartier",
+                "coords": [
+                    45.5604,
+                    -73.6811
+                ],
+                "name_normalized": "cartier"
+            },
+            {
+                "name": "De la Concorde",
+                "coords": [
+                    45.5613,
+                    -73.7088
+                ],
+                "name_normalized": "de la concorde"
+            },
+            {
+                "name": "Montmorency",
+                "coords": [
+                    45.5582,
+                    -73.7212
+                ],
+                "name_normalized": "montmorency"
+            }
+        ]
+    },
+    "Green": {
+        "Stations": [
+            {
+                "name": "Angrignon",
+                "coords": [
+                    45.4462,
+                    -73.6033
+                ],
+                "name_normalized": "angrignon"
+            },
+            {
+                "name": "Monk",
+                "coords": [
+                    45.4512,
+                    -73.5986
+                ],
+                "name_normalized": "monk"
+            },
+            {
+                "name": "Jolicoeur",
+                "coords": [
+                    45.4563,
+                    -73.5881
+                ],
+                "name_normalized": "jolicoeur"
+            },
+            {
+                "name": "Verdun",
+                "coords": [
+                    45.4591,
+                    -73.5717
+                ],
+                "name_normalized": "verdun"
+            },
+            {
+                "name": "De l'Église",
+                "coords": [
+                    45.4628,
+                    -73.567
+                ],
+                "name_normalized": "de l glise"
+            },
+            {
+                "name": "Lasalle",
+                "coords": [
+                    45.4712,
+                    -73.5663
+                ],
+                "name_normalized": "lasalle"
+            },
+            {
+                "name": "Charlevoix",
+                "coords": [
+                    45.4784,
+                    -73.5517
+                ],
+                "name_normalized": "charlevoix"
+            },
+            {
+                "name": "Lionel-Groulx",
+                "coords": [
+                    45.4831,
+                    -73.5796
+                ],
+                "name_normalized": "lionel groulx"
+            },
+            {
+                "name": "Atwater",
+                "coords": [
+                    45.4896,
+                    -73.5857
+                ],
+                "name_normalized": "atwater"
+            },
+            {
+                "name": "Guy-Concordia",
+                "coords": [
+                    45.4952,
+                    -73.5796
+                ],
+                "name_normalized": "guy concordia"
+            },
+            {
+                "name": "Peel",
+                "coords": [
+                    45.5008,
+                    -73.5746
+                ],
+                "name_normalized": "peel"
+            },
+            {
+                "name": "McGill",
+                "coords": [
+                    45.5041,
+                    -73.5716
+                ],
+                "name_normalized": "mcgill"
+            },
+            {
+                "name": "Place-des-Arts",
+                "coords": [
+                    45.5085,
+                    -73.5683
+                ],
+                "name_normalized": "place des arts"
+            },
+            {
+                "name": "Saint-Laurent",
+                "coords": [
+                    45.5111,
+                    -73.5649
+                ],
+                "name_normalized": "saint laurent"
+            },
+            {
+                "name": "Berri-UQAM",
+                "coords": [
+                    45.5155,
+                    -73.5611
+                ],
+                "name_normalized": "berri uqam"
+            },
+            {
+                "name": "Beaudry",
+                "coords": [
+                    45.5191,
+                    -73.5568
+                ],
+                "name_normalized": "beaudry"
+            },
+            {
+                "name": "Papineau",
+                "coords": [
+                    45.5238,
+                    -73.5519
+                ],
+                "name_normalized": "papineau"
+            },
+            {
+                "name": "Frontenac",
+                "coords": [
+                    45.533,
+                    -73.5422
+                ],
+                "name_normalized": "frontenac"
+            },
+            {
+                "name": "Préfontaine",
+                "coords": [
+                    45.5413,
+                    -73.5418
+                ],
+                "name_normalized": "pr fontaine"
+            },
+            {
+                "name": "Joliette",
+                "coords": [
+                    45.5469,
+                    -73.5448
+                ],
+                "name_normalized": "joliette"
+            },
+            {
+                "name": "Pie-IX",
+                "coords": [
+                    45.5539,
+                    -73.5517
+                ],
+                "name_normalized": "pie ix"
+            },
+            {
+                "name": "Viau",
+                "coords": [
+                    45.5609,
+                    -73.5469
+                ],
+                "name_normalized": "viau"
+            },
+            {
+                "name": "Assomption",
+                "coords": [
+                    45.5694,
+                    -73.5434
+                ],
+                "name_normalized": "assomption"
+            },
+            {
+                "name": "Cadillac",
+                "coords": [
+                    45.5768,
+                    -73.5442
+                ],
+                "name_normalized": "cadillac"
+            },
+            {
+                "name": "Langelier",
+                "coords": [
+                    45.5828,
+                    -73.5432
+                ],
+                "name_normalized": "langelier"
+            },
+            {
+                "name": "Radisson",
+                "coords": [
+                    45.5888,
+                    -73.5358
+                ],
+                "name_normalized": "radisson"
+            },
+            {
+                "name": "Honoré-Beaugrand",
+                "coords": [
+                    45.5968,
+                    -73.5359
+                ],
+                "name_normalized": "honor beaugrand"
+            }
+        ]
+    },
+    "Blue": {
+        "Stations": [
+            {
+                "name": "Snowdon",
+                "coords": [
+                    45.4855,
+                    -73.6277
+                ],
+                "name_normalized": "snowdon"
+            },
+            {
+                "name": "Côte-des-Neiges",
+                "coords": [
+                    45.4965,
+                    -73.6231
+                ],
+                "name_normalized": "c te des neiges"
+            },
+            {
+                "name": "Université-de-Montréal",
+                "coords": [
+                    45.503,
+                    -73.6131
+                ],
+                "name_normalized": "universit de montr al"
+            },
+            {
+                "name": "Édouard-Montpetit",
+                "coords": [
+                    45.51,
+                    -73.6114
+                ],
+                "name_normalized": "douard montpetit"
+            },
+            {
+                "name": "Outremont",
+                "coords": [
+                    45.5204,
+                    -73.6141
+                ],
+                "name_normalized": "outremont"
+            },
+            {
+                "name": "Acadie",
+                "coords": [
+                    45.5235,
+                    -73.6238
+                ],
+                "name_normalized": "acadie"
+            },
+            {
+                "name": "Parc",
+                "coords": [
+                    45.5302,
+                    -73.6238
+                ],
+                "name_normalized": "parc"
+            },
+            {
+                "name": "De Castelnau",
+                "coords": [
+                    45.5355,
+                    -73.62
+                ],
+                "name_normalized": "de castelnau"
+            },
+            {
+                "name": "Jean-Talon",
+                "coords": [
+                    45.5398,
+                    -73.6134
+                ],
+                "name_normalized": "jean talon"
+            },
+            {
+                "name": "Fabre",
+                "coords": [
+                    45.5478,
+                    -73.6067
+                ],
+                "name_normalized": "fabre"
+            },
+            {
+                "name": "D'Iberville",
+                "coords": [
+                    45.5534,
+                    -73.599
+                ],
+                "name_normalized": "d iberville"
+            },
+            {
+                "name": "Saint-Michel",
+                "coords": [
+                    45.5595,
+                    -73.6
+                ],
+                "name_normalized": "saint michel"
+            }
+        ]
+    },
+    "Yellow": {
+        "Stations": [
+            {
+                "name": "Berri-UQAM",
+                "coords": [
+                    45.5155,
+                    -73.5611
+                ],
+                "name_normalized": "berri uqam"
+            },
+            {
+                "name": "Jean-Drapeau",
+                "coords": [
+                    45.5122,
+                    -73.5323
+                ],
+                "name_normalized": "jean drapeau"
+            },
+            {
+                "name": "Longueuil-Université-de-Sherbrooke",
+                "coords": [
+                    45.5255,
+                    -73.5218
+                ],
+                "name_normalized": "longueuil universit de sherbrooke"
+            }
+        ]
+    },
+    "REM": {
+        "Stations": [
+            {
+                "name": "Brossard",
+                "coords": [
+                    45.4418,
+                    -73.4402
+                ],
+                "name_normalized": "brossard"
+            },
+            {
+                "name": "Du Quartier",
+                "coords": [
+                    45.4475,
+                    -73.4542
+                ],
+                "name_normalized": "du quartier"
+            },
+            {
+                "name": "Panama",
+                "coords": [
+                    45.4745,
+                    -73.4731
+                ],
+                "name_normalized": "panama"
+            },
+            {
+                "name": "Île-des-Sœurs",
+                "coords": [
+                    45.4678,
+                    -73.5518
+                ],
+                "name_normalized": "le des s urs"
+            },
+            {
+                "name": "Gare Centrale",
+                "coords": [
+                    45.4998,
+                    -73.5663
+                ],
+                "name_normalized": "gare centrale"
+            },
+            {
+                "name": "McGill",
+                "coords": [
+                    45.5039,
+                    -73.5717
+                ],
+                "name_normalized": "mcgill"
+            },
+            {
+                "name": "Édouard-Montpetit",
+                "coords": [
+                    45.51,
+                    -73.6125
+                ],
+                "name_normalized": "douard montpetit"
+            },
+            {
+                "name": "Canora",
+                "coords": [
+                    45.5139,
+                    -73.6344
+                ],
+                "name_normalized": "canora"
+            },
+            {
+                "name": "Ville-de-Mont-Royal",
+                "coords": [
+                    45.5169,
+                    -73.645
+                ],
+                "name_normalized": "ville de mont royal"
+            },
+            {
+                "name": "Côte-de-Liesse",
+                "coords": [
+                    45.5217,
+                    -73.6608
+                ],
+                "name_normalized": "c te de liesse"
+            },
+            {
+                "name": "Montpellier",
+                "coords": [
+                    45.5247,
+                    -73.6719
+                ],
+                "name_normalized": "montpellier"
+            },
+            {
+                "name": "Du Ruisseau",
+                "coords": [
+                    45.5289,
+                    -73.6911
+                ],
+                "name_normalized": "du ruisseau"
+            },
+            {
+                "name": "Bois-Franc",
+                "coords": [
+                    45.5222,
+                    -73.7119
+                ],
+                "name_normalized": "bois franc"
+            },
+            {
+                "name": "Sunnybrooke",
+                "coords": [
+                    45.5036,
+                    -73.7847
+                ],
+                "name_normalized": "sunnybrooke"
+            },
+            {
+                "name": "Pierrefonds-Roxboro",
+                "coords": [
+                    45.5092,
+                    -73.8094
+                ],
+                "name_normalized": "pierrefonds roxboro"
+            },
+            {
+                "name": "Île-Bigras",
+                "coords": [
+                    45.52,
+                    -73.8531
+                ],
+                "name_normalized": "le bigras"
+            },
+            {
+                "name": "Sainte-Dorothée",
+                "coords": [
+                    45.5233,
+                    -73.8611
+                ],
+                "name_normalized": "sainte doroth e"
+            },
+            {
+                "name": "Grand-Moulin",
+                "coords": [
+                    45.5372,
+                    -73.8878
+                ],
+                "name_normalized": "grand moulin"
+            },
+            {
+                "name": "Deux-Montagnes",
+                "coords": [
+                    45.5456,
+                    -73.9122
+                ],
+                "name_normalized": "deux montagnes"
+            },
+            {
+                "name": "Des Sources",
+                "coords": [
+                    45.4772,
+                    -73.7911
+                ],
+                "name_normalized": "des sources"
+            },
+            {
+                "name": "Fairview-Pointe-Claire",
+                "coords": [
+                    45.4647,
+                    -73.8247
+                ],
+                "name_normalized": "fairview pointe claire"
+            },
+            {
+                "name": "Kirkland",
+                "coords": [
+                    45.4403,
+                    -73.8858
+                ],
+                "name_normalized": "kirkland"
+            },
+            {
+                "name": "Anse-à-l'Orme",
+                "coords": [
+                    45.4297,
+                    -73.9175
+                ],
+                "name_normalized": "anse l orme"
+            },
+            {
+                "name": "Marie-Curie",
+                "coords": [
+                    45.4672,
+                    -73.7431
+                ],
+                "name_normalized": "marie curie"
+            },
+            {
+                "name": "YUL-Aéroport-Montréal-Trudeau",
+                "coords": [
+                    45.4572,
+                    -73.7497
+                ],
+                "name_normalized": "yul a roport montr al trudeau"
+            }
+        ]
+    }
+}
