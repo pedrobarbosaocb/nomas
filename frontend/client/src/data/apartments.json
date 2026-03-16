@@ -50,7 +50,8 @@
     },
     "location_info": {
       "address": "1180 Rue De Bleury",
-      "nearest_metro": "Place-des-Arts (Green)"
+      "nearest_metro": "Berri-UQAM (Orange, Green, Yellow)",
+      "distance_to_metro_km": 0.5
     }
   },
   {
@@ -64,7 +65,9 @@
       "images": []
     },
     "location_info": {
-      "address": "Chomedey, Laval"
+      "address": "Chomedey, Laval",
+      "nearest_metro": "Montmorency (Orange)",
+      "distance_to_metro_km": 15.0
     }
   }
 ]

@@ -1,13 +1,27 @@
 import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
 import apartments from '@/data/apartments.json';
+import { unbuiltREMStations } from '@/utils/metro';
+
+export type SortOption = 'default' | 'price_asc' | 'price_desc' | 'distance_asc';
+
+export interface SortCriterion {
+  id: 'price' | 'distance';
+  direction: 'asc' | 'desc';
+}
 
 export interface FilterState {
+  minPrice: string;
   maxPrice: string;
   maxDistanceToMetro: string;
   selectedMetros: string[];
   searchText: string;
-  furnishedOnly: boolean;
+  electricityIncluded: boolean;
+  heatingIncluded: boolean;
   petsAllowed: boolean;
+  furnishedOnly: boolean;
+  sortBy: SortOption;
+  advancedSorting: boolean;
+  advancedSortItems: SortCriterion[];
 }
 
 interface FilterContextType {
@@ -15,8 +29,12 @@ interface FilterContextType {
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   showFilters: boolean;
   setShowFilters: React.Dispatch<React.SetStateAction<boolean>>;
+  showSortSidebar: boolean;
+  setShowSortSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   isPinned: boolean;
   setIsPinned: React.Dispatch<React.SetStateAction<boolean>>;
+  isSortPinned: boolean;
+  setIsSortPinned: React.Dispatch<React.SetStateAction<boolean>>;
   showMetroDropdown: boolean;
   setShowMetroDropdown: React.Dispatch<React.SetStateAction<boolean>>;
   metroGroups: Record<string, string[]>;
@@ -28,33 +46,52 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export function FilterProvider({ children }: { children: ReactNode }) {
   const [showFilters, setShowFilters] = useState(false);
+  const [showSortSidebar, setShowSortSidebar] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [isSortPinned, setIsSortPinned] = useState(false);
   const [showMetroDropdown, setShowMetroDropdown] = useState(false);
   
   const [filters, setFilters] = useState<FilterState>({
+    minPrice: '',
     maxPrice: '',
     maxDistanceToMetro: '',
     selectedMetros: [],
     searchText: '',
-    furnishedOnly: false,
+    electricityIncluded: false,
+    heatingIncluded: false,
     petsAllowed: false,
+    furnishedOnly: false,
+    sortBy: 'default',
+    advancedSorting: false,
+    advancedSortItems: [{ id: 'price', direction: 'asc' }, { id: 'distance', direction: 'asc' }],
   });
 
   const clearFilters = () => {
     setFilters({
+      minPrice: '',
       maxPrice: '',
       maxDistanceToMetro: '',
       selectedMetros: [],
       searchText: '',
-      furnishedOnly: false,
+      electricityIncluded: false,
+      heatingIncluded: false,
       petsAllowed: false,
+      furnishedOnly: false,
+      sortBy: 'default',
+      advancedSorting: false,
+      advancedSortItems: [{ id: 'price', direction: 'asc' }, { id: 'distance', direction: 'asc' }],
     });
   };
 
   const metroGroups = useMemo(() => {
     const metros = apartments
       .map(apt => apt.location_info?.nearest_metro)
-      .filter((metro): metro is string => Boolean(metro));
+      .filter((metro): metro is string => Boolean(metro))
+      .filter(metro => {
+        const match = metro.match(/(.*?)\s*\(/);
+        if(!match) return true;
+        return !unbuiltREMStations.has(match[1].trim());
+      });
     
     const unique = Array.from(new Set(metros)).sort();
     
@@ -97,8 +134,12 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       setFilters,
       showFilters,
       setShowFilters,
+      showSortSidebar,
+      setShowSortSidebar,
       isPinned,
       setIsPinned,
+      isSortPinned,
+      setIsSortPinned,
       showMetroDropdown,
       setShowMetroDropdown,
       metroGroups,

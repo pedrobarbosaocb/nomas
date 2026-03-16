@@ -5,19 +5,30 @@ import { ApartmentCard } from '@/components/ApartmentCard';
 import { useApartmentRatings } from '@/hooks/useApartmentRatings';
 import { useFilterContext } from '@/context/FilterContext';
 import { FilterSidebar } from '@/components/FilterSidebar';
+import { SortSidebar } from '@/components/SortSidebar';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type FilterType = 'all' | 'liked' | 'disliked' | 'not-rated';
 
 export default function ListingPage() {
   const { getRating, toggleLike, toggleDislike } = useApartmentRatings();
+  const { t } = useLanguage();
   const [filter, setFilter] = useState<FilterType>('all');
   const [gridCols, setGridCols] = useState<1 | 2 | 3>(2);
-  const { filters, showFilters, setShowFilters } = useFilterContext();
+  const { filters, showFilters, setShowFilters, isPinned, isSortPinned } = useFilterContext();
 
   const filteredApartments = useMemo(() => {
-    return apartments.filter(apt => {
+    let result = apartments.filter(apt => {
       // 1. Check local rating filter
       if (filter !== 'all' && getRating(apt.link) !== filter) return false;
+
+      // 1b. Min Price Filter
+      if (filters.minPrice) {
+        const priceVal = parseFloat(apt.price.replace(/[^0-9.-]+/g, ''));
+        if (!isNaN(priceVal) && priceVal < parseFloat(filters.minPrice)) {
+          return false;
+        }
+      }
 
       // 2. Max Price Filter
       if (filters.maxPrice) {
@@ -62,8 +73,64 @@ export default function ListingPage() {
         if ((apt.details?.pets_allowed as unknown as boolean) !== true) return false;
       }
 
+      // 8. Electricity
+      if (filters.electricityIncluded) {
+        if ((apt.included?.electricity as unknown as boolean) !== true) return false;
+      }
+
+      // 9. Heating
+      if (filters.heatingIncluded) {
+        if ((apt.included?.heating as unknown as boolean) !== true) return false;
+      }
+
       return true;
     });
+
+    result.sort((a, b) => {
+      // Always push properties marked as "Disliked" to the bottom of the "Todos" list
+      if (filter === 'all') {
+        const isDislikedA = getRating(a.link) === 'disliked';
+        const isDislikedB = getRating(b.link) === 'disliked';
+        if (isDislikedA !== isDislikedB) {
+          return isDislikedA ? 1 : -1;
+        }
+      }
+
+      // Then apply the active sorting configurations
+      if (filters.advancedSorting) {
+        for (const criterion of filters.advancedSortItems) {
+          if (criterion.id === 'price') {
+            const priceA = parseFloat(a.price.replace(/[^0-9.-]+/g, '')) || 0;
+            const priceB = parseFloat(b.price.replace(/[^0-9.-]+/g, '')) || 0;
+            const diff = priceA - priceB;
+            if (diff !== 0) return criterion.direction === 'asc' ? diff : -diff;
+          } else if (criterion.id === 'distance') {
+            const distA = a.location_info?.distance_to_metro_km ?? Infinity;
+            const distB = b.location_info?.distance_to_metro_km ?? Infinity;
+            const diff = distA - distB;
+            if (diff !== 0) return criterion.direction === 'asc' ? diff : -diff;
+          }
+        }
+        return 0;
+      } else {
+        if (filters.sortBy === 'price_asc') {
+          const priceA = parseFloat(a.price.replace(/[^0-9.-]+/g, '')) || 0;
+          const priceB = parseFloat(b.price.replace(/[^0-9.-]+/g, '')) || 0;
+          return priceA - priceB;
+        } else if (filters.sortBy === 'price_desc') {
+          const priceA = parseFloat(a.price.replace(/[^0-9.-]+/g, '')) || 0;
+          const priceB = parseFloat(b.price.replace(/[^0-9.-]+/g, '')) || 0;
+          return priceB - priceA;
+        } else if (filters.sortBy === 'distance_asc') {
+          const distA = a.location_info?.distance_to_metro_km ?? Infinity;
+          const distB = b.location_info?.distance_to_metro_km ?? Infinity;
+          return distA - distB;
+        }
+        return 0;
+      }
+    });
+
+    return result;
   }, [filter, getRating, filters]);
 
   const stats = {
@@ -90,7 +157,7 @@ export default function ListingPage() {
               }`}
             >
               <Home size={16} />
-              Todos
+              {t('all')}
             </button>
             <button
               onClick={() => setFilter('liked')}
@@ -101,7 +168,7 @@ export default function ListingPage() {
               }`}
             >
               <ThumbsUp size={16} />
-              Gostei ({stats.liked})
+              {t('liked')} ({stats.liked})
             </button>
             <button
               onClick={() => setFilter('disliked')}
@@ -112,7 +179,7 @@ export default function ListingPage() {
               }`}
             >
               <ThumbsDown size={16} />
-              Não gostei ({stats.disliked})
+              {t('disliked')} ({stats.disliked})
             </button>
             <button
               onClick={() => setFilter('not-rated')}
@@ -122,12 +189,12 @@ export default function ListingPage() {
                   : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700'
               }`}
             >
-              Não avaliado ({stats.notRated})
+              {t('notRatedBtn')} ({stats.notRated})
             </button>
           </div>
 
           <div className="flex items-center gap-3 border-l border-gray-200 dark:border-gray-800 pl-4 ml-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium hidden sm:inline">Cards por linha:</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium hidden sm:inline">{t('cardsPerRow')}</span>
             <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               {[1, 2, 3].map(num => (
                 <button
@@ -147,16 +214,19 @@ export default function ListingPage() {
       </div>
 
       {/* Main Content Area */}
-      <div className="relative max-w-[1600px] mx-auto px-4 py-8 flex gap-8 items-start">
-        {/* Sidebar */}
-        <FilterSidebar />
+      <div className={`relative max-w-[1600px] mx-auto px-4 py-8 flex items-start ${isPinned || isSortPinned ? 'gap-8' : ''}`}>
+        {/* Left Sidebars Container */}
+        <div className="flex flex-col gap-6 shrink-0 z-40 w-full lg:w-auto">
+          <SortSidebar />
+          <FilterSidebar />
+        </div>
 
         {/* Content */}
         <div className="flex-1 w-full min-w-0">
           {filteredApartments.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 dark:text-gray-400 text-lg">
-                Nenhum apartamento encontrado com este filtro.
+                {t('noApartments')}
               </p>
             </div>
           ) : (
