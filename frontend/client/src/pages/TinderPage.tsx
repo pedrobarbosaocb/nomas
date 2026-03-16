@@ -1,65 +1,16 @@
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Filter, X, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import apartments from '@/data/apartments.json';
 import { ApartmentCard } from '@/components/ApartmentCard';
 import { useApartmentRatings } from '@/hooks/useApartmentRatings';
+import { useFilterContext } from '@/context/FilterContext';
+import { FilterSidebar } from '@/components/FilterSidebar';
 
 export default function TinderPage() {
   const { getRating, toggleLike, toggleDislike } = useApartmentRatings();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showFilters, setShowFilters] = useState(false);
-  const [showMetroDropdown, setShowMetroDropdown] = useState(false);
   
-  const [filters, setFilters] = useState({
-    maxPrice: '',
-    maxDistanceToMetro: '',
-    selectedMetros: [] as string[],
-    searchText: '',
-    furnishedOnly: false,
-    petsAllowed: false,
-  });
-
-  // Compute unique metros dynamically and group by line
-  const metroGroups = useMemo(() => {
-    const metros = apartments
-      .map(apt => apt.location_info?.nearest_metro)
-      .filter((metro): metro is string => Boolean(metro));
-    
-    const unique = Array.from(new Set(metros)).sort();
-    
-    const groups: Record<string, string[]> = {
-      'Green': [],
-      'Orange': [],
-      'Blue': [],
-      'Yellow': [],
-      'REM': [],
-      'Other': []
-    };
-
-    unique.forEach(metro => {
-      const match = metro.match(/\((.*?)\)/);
-      if (match && groups[match[1]]) {
-        groups[match[1]].push(metro);
-      } else {
-        groups['Other'].push(metro);
-      }
-    });
-
-    // Remove empty groups
-    return Object.fromEntries(Object.entries(groups).filter(([_, list]) => list.length > 0));
-  }, []);
-
-  const toggleMetro = (metro: string) => {
-    setFilters(prev => {
-      const isSelected = prev.selectedMetros.includes(metro);
-      return {
-        ...prev,
-        selectedMetros: isSelected 
-          ? prev.selectedMetros.filter(m => m !== metro)
-          : [...prev.selectedMetros, metro]
-      };
-    });
-  };
+  const { filters, showFilters, setShowFilters, isPinned } = useFilterContext();
 
   // Filtrar apenas apartamentos não avaliados e que batem com o filtro
   const notRatedApartments = useMemo(() => {
@@ -155,15 +106,15 @@ export default function TinderPage() {
 
   if (notRatedApartments.length === 0 && apartments.filter(a => getRating(a.link) === 'not-rated').length === 0) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center transition-colors">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             Parabéns! 🎉
           </h2>
-          <p className="text-gray-600 text-lg mb-8">
+          <p className="text-gray-600 dark:text-gray-300 text-lg mb-8">
             Você avaliou todos os apartamentos.
           </p>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             Volte para a listagem para ver seus favoritos ou adicione novos apartamentos.
           </p>
         </div>
@@ -174,201 +125,22 @@ export default function TinderPage() {
   const evaluatedCount = apartments.filter(a => getRating(a.link) !== 'not-rated').length;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center p-4">
-      {/* Header */}
-      <div className="mb-6 w-full max-w-xl lg:max-w-5xl">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Avalie Apartamentos
-          </h1>
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className={`p-2 rounded-full transition-colors lg:hidden ${showFilters ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            <Filter size={20} />
-          </button>
-        </div>
-        <p className="text-gray-600 text-sm">
-          {evaluatedCount} de {apartments.length} avaliados no total
-          {notRatedApartments.length !== (apartments.length - evaluatedCount) && (
-            <span className="block mt-1 text-emerald-600 font-medium">
-              {notRatedApartments.length} apartamentos encontrados com os filtros atuais
-            </span>
-          )}
-        </p>
-      </div>
-
-      <div className="w-full max-w-xl lg:max-w-5xl flex gap-8 items-start">
+    <div className="h-[calc(100dvh-58px)] overflow-hidden bg-transparent flex flex-col items-center px-4">
+      <div className="relative w-full max-w-[1600px] flex gap-8 items-center h-full">
         {/* Filter Panel */}
-        <div className={`
-          ${showFilters ? 'fixed inset-0 z-50 bg-white/50 backdrop-blur-sm sm:backdrop-blur-md sm:bg-black/20 animate-in fade-in flex items-center justify-center p-4' : 'hidden'}
-          lg:static lg:block lg:w-80 lg:shrink-0 lg:bg-transparent lg:p-0 lg:flex-none
-        `}>
-          <div className="w-full max-w-md bg-white lg:bg-gray-50 rounded-xl lg:border border-gray-200 shadow-xl lg:shadow-sm p-5 max-h-[90vh] lg:max-h-none overflow-y-auto lg:overflow-visible">
-            <div className="flex items-center justify-between mb-4 lg:mb-3">
-              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Filtros</h3>
-              <button 
-                onClick={() => setShowFilters(false)}
-                className="lg:hidden p-1.5 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Preço Máximo ($)</label>
-                <input 
-                  type="number" 
-                  value={filters.maxPrice}
-                  onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                  placeholder="Ex: 1500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Buscar (título, desc, end)</label>
-                <input 
-                  type="text" 
-                  value={filters.searchText}
-                  onChange={(e) => setFilters(prev => ({ ...prev, searchText: e.target.value }))}
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                  placeholder="Ex: 2-bedroom"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-2">Estações de Metrô Específicas</label>
-                
-                <div className="relative">
-                  <button
-                    onClick={() => setShowMetroDropdown(!showMetroDropdown)}
-                    className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-left"
-                  >
-                    <span className="truncate">
-                      {filters.selectedMetros.length === 0 
-                        ? 'Selecionar estações...' 
-                        : `${filters.selectedMetros.length} estação(ões) selecionada(s)`}
-                    </span>
-                    <ChevronDown size={16} className={`text-gray-500 transition-transform ${showMetroDropdown ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {showMetroDropdown && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2">
-                      <div className="p-3 max-h-64 overflow-y-auto custom-scrollbar space-y-4">
-                        {Object.entries(metroGroups).map(([line, metros]) => (
-                          <div key={line} className="space-y-2">
-                            <h4 className={`text-[10px] font-bold uppercase tracking-wider ${
-                              line === 'Green' ? 'text-green-600' :
-                              line === 'Orange' ? 'text-orange-500' :
-                              line === 'Blue' ? 'text-blue-600' :
-                              line === 'Yellow' ? 'text-yellow-600' :
-                              line === 'REM' ? 'text-emerald-500' :
-                              'text-gray-500'
-                            }`}>
-                              Linha {line === 'Other' ? 'Outras' : line}
-                            </h4>
-                            <div className="flex flex-col gap-1">
-                              {(metros as string[]).map(metro => {
-                                const isSelected = filters.selectedMetros.includes(metro);
-                                const cleanLabel = metro.replace(/\s*\(.*?\)\s*/g, '');
-                                
-                                return (
-                                  <label
-                                    key={metro}
-                                    className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded-md cursor-pointer group transition-colors"
-                                  >
-                                    <input 
-                                      type="checkbox"
-                                      checked={isSelected}
-                                      onChange={() => toggleMetro(metro)}
-                                      className="rounded text-emerald-600 focus:ring-emerald-500"
-                                    />
-                                    <span className={`text-xs ${isSelected ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
-                                      {cleanLabel}
-                                    </span>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                        {Object.keys(metroGroups).length === 0 && (
-                          <p className="text-xs text-gray-500 italic">Nenhuma estação de metrô encontrada.</p>
-                        )}
-                      </div>
-                      
-                      {filters.selectedMetros.length > 0 && (
-                        <div className="p-2 border-t border-gray-100 bg-gray-50 flex justify-end">
-                          <button 
-                            onClick={() => setFilters(prev => ({ ...prev, selectedMetros: [] }))}
-                            className="text-[10px] font-medium text-red-600 hover:text-red-700 uppercase tracking-wider px-2 py-1"
-                          >
-                            Limpar Seleção
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Distância Máx. Metrô (km)</label>
-                <input 
-                  type="number" 
-                  step="0.1"
-                  value={filters.maxDistanceToMetro}
-                  onChange={(e) => setFilters(prev => ({ ...prev, maxDistanceToMetro: e.target.value }))}
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                  placeholder="Ex: 1.5"
-                />
-              </div>
-
-              <div className="flex gap-4 pt-2">
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={filters.furnishedOnly}
-                    onChange={(e) => setFilters(prev => ({ ...prev, furnishedOnly: e.target.checked }))}
-                    className="rounded text-emerald-600 focus:ring-emerald-500"
-                  />
-                  Mobiliado
-                </label>
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={filters.petsAllowed}
-                    onChange={(e) => setFilters(prev => ({ ...prev, petsAllowed: e.target.checked }))}
-                    className="rounded text-emerald-600 focus:ring-emerald-500"
-                  />
-                  Aceita Pets
-                </label>
-              </div>
-
-              <div className="pt-4 mt-2 flex justify-end border-t border-gray-100">
-                <button 
-                  onClick={() => setFilters({ maxPrice: '', maxDistanceToMetro: '', selectedMetros: [], searchText: '', furnishedOnly: false, petsAllowed: false })}
-                  className="text-xs text-red-600 font-medium hover:text-red-700 px-3 py-1.5 bg-red-50 rounded-lg"
-                >
-                  Limpar Filtros
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <FilterSidebar />
 
         {/* Card Container Layout */}
-        <div className="flex-1 w-full min-w-0 flex flex-col items-center">
+        <div className="flex-1 w-full min-w-0 flex flex-col items-center h-full justify-center">
           {/* Card Engine */}
           <div className="w-full flex items-center justify-center mb-6">
             {/* Previous Button */}
             <button
               onClick={handlePrevious}
               disabled={currentIndex === 0}
-              className="p-3 rounded-lg mr-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100"
+              className="p-3 rounded-lg mr-2 sm:mr-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <ChevronLeft size={24} className="text-gray-700" />
+              <ChevronLeft size={24} className="text-gray-700 dark:text-gray-300" />
             </button>
 
             {/* Card */}
@@ -382,7 +154,7 @@ export default function TinderPage() {
                   variant="tinder"
                 />
               ) : (
-                <div className="w-full h-[calc(100vh-160px)] min-h-[400px] max-h-[600px] border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 text-gray-500 p-8 text-center">
+                <div className="w-full h-[calc(100vh-160px)] min-h-[400px] max-h-[600px] border-2 border-dashed border-gray-300 dark:border-gray-800 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 p-8 text-center transition-colors">
                   <p>Nenhum apartamento encontrado com os filtros atuais.</p>
                 </div>
               )}
@@ -392,14 +164,14 @@ export default function TinderPage() {
             <button
               onClick={handleNext}
               disabled={currentIndex === notRatedApartments.length - 1}
-              className="p-3 rounded-lg ml-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100"
+              className="p-3 rounded-lg ml-2 sm:ml-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <ChevronRight size={24} className="text-gray-700" />
+              <ChevronRight size={24} className="text-gray-700 dark:text-gray-300" />
             </button>
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full max-w-xl bg-gray-200 rounded-full h-2">
+          <div className="w-full max-w-xl bg-gray-200 dark:bg-gray-800 rounded-full h-2">
             <div
               className="bg-emerald-600 h-2 rounded-full transition-all"
               style={{
@@ -408,6 +180,11 @@ export default function TinderPage() {
             />
           </div>
         </div>
+        
+        {/* Dummy spacer to maintain perfect centering when sidebar is pinned */}
+        {isPinned && showFilters && (
+          <div className="hidden lg:block lg:w-[340px] lg:shrink-0" />
+        )}
       </div>
     </div>
   );
