@@ -120,6 +120,16 @@ def _fetch_listing_details(ad_id, ad):
     }
 
 
+def _scrape_page_worker(city_lower, loc_id, page_num):
+    """
+    Worker function: fetches a single search results page and returns its ads.
+    """
+    url = f"https://www.kijiji.ca/b-apartments-condos/{city_lower}/page-{page_num}/c30349001l{loc_id}"
+    scraper = KijijiAPI(filename=None)
+    ads, _ = scraper.scrape_kijiji_for_ads(url, multi_page=False)
+    return page_num, ads
+
+
 class KijijiScraper(BaseScraper):
     def __init__(self, city=None, max_workers=8, max_results=None):
         super().__init__(city)
@@ -131,42 +141,55 @@ class KijijiScraper(BaseScraper):
     def search(self):
         print(f"\n[Kijiji] Searching for {self.city} apartments...")
         
-        scraper = KijijiAPI(filename=None)
         results = []
         page_num = 1
+        batch_size = 5 # fetch 5 pages concurrently
         
         try:
             while True:
                 if self.max_results and len(results) >= self.max_results:
                     break
                 
-                print(f"  > Exploring page {page_num}...")
+                print(f"  > Fetching pages {page_num} to {page_num + batch_size - 1} concurrently...")
                 
-                # Format: https://www.kijiji.ca/b-apartments-condos/[city]/page-[num]/c30349001l[loc_id]
-                url = f"https://www.kijiji.ca/b-apartments-condos/{self.city_lower}/page-{page_num}/c30349001l{self.loc_id}"
+                new_ads_all = {}
+                found_empty_page = False
                 
-                # Reset the scraper's new_ads for each page call
-                scraper.new_ads = {}
-                # We call with multi_page=False because we are handling the loop here
-                new_ads, _ = scraper.scrape_kijiji_for_ads(url, multi_page=False)
+                with ThreadPoolExecutor(max_workers=min(batch_size, self.max_workers)) as executor:
+                    futures = [
+                        executor.submit(_scrape_page_worker, self.city_lower, self.loc_id, p)
+                        for p in range(page_num, page_num + batch_size)
+                    ]
+                    
+                    for future in as_completed(futures):
+                        try:
+                            p_num, ads = future.result()
+                            if not ads:
+                                found_empty_page = True
+                            else:
+                                new_ads_all.update(ads)
+                        except Exception as e:
+                            print(f"    > Error fetching page: {e}")
                 
-                if not new_ads:
-                    print(f"  > No more results found on page {page_num}. Ending search.")
+                if not new_ads_all:
+                    print(f"  > No results found in batch starting at page {page_num}. Ending search.")
                     break
-
+                    
+                print(f"  > Found {len(new_ads_all)} ads in page batch. Fetching details...")
+                
                 # Fetch all listing pages in parallel
                 with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
                     futures = {
                         executor.submit(_fetch_listing_details, ad_id, ad): ad_id
-                        for ad_id, ad in new_ads.items()
+                        for ad_id, ad in new_ads_all.items()
                     }
-                    page_results_count = 0
+                    batch_results_count = 0
                     for future in as_completed(futures):
                         try:
                             result = future.result()
                             if result is not None:
                                 results.append(result)
-                                page_results_count += 1
+                                batch_results_count += 1
                                 if self.max_results and len(results) >= self.max_results:
                                     break
                         except Exception as e:
@@ -177,13 +200,18 @@ class KijijiScraper(BaseScraper):
                         for future in futures:
                             future.cancel()
                     
-                print(f"  > Found {page_results_count} valid listings on page {page_num}. Total: {len(results)}")
+                print(f"  > Extracted {batch_results_count} valid listings from batch. Total so far: {len(results)}")
                 
-                page_num += 1
+                if found_empty_page or (self.max_results and len(results) >= self.max_results):
+                    print("  > Reached end of results or requested limit. Stopping.")
+                    break
+                    
+                page_num += batch_size
+                
                 # Safety break to avoid infinite loops
-                if page_num > 100 or (self.max_results and len(results) >= self.max_results):
-                    if page_num > 100:
-                        print("  > Reached limit of 100 pages. Stopping.")
+                # 500 pages limit translates to roughly 20,000 listings
+                if page_num > 500:
+                    print("  > Reached hard limit of 500 pages. Stopping.")
                     break
 
         except Exception as e:
