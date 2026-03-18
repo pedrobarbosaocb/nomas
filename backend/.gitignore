@@ -1,9 +1,0 @@
-__pycache__
-*.pyc
-.vscode
-.venv
-Kijiji-Scraper/ads.json
-Kijiji-Scraper/kijiji_scraper.egg-info/*
-Kijiji-Scraper/dist/*
-Kijiji-Scraper/build/*
-facebook-marketplace-scraper/__pycache__

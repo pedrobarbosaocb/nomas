@@ -56,7 +56,7 @@ def root():
 @app.get("/crawl_facebook_marketplace")
 # Define a function to be executed when the endpoint is called.
 # Add a description to the function.
-def crawl_facebook_marketplace(city: str, query: str, max_price: int, bedrooms: int = None, max_results: int = None):
+def crawl_facebook_marketplace(city: str, query: str = "", max_results: int = None):
     # Define dictionary of cities from the facebook marketplace directory for United States.
     # https://m.facebook.com/marketplace/directory/US/?_se_imp=0oey5sMRMSl7wluQZ
     # TODO - Add more cities to the dictionary.
@@ -108,10 +108,8 @@ def crawl_facebook_marketplace(city: str, query: str, max_price: int, bedrooms: 
     }
     # Skip the city mapping logic from the original package and just use the string passed in
     # Define the URL to scrape. We target propertyrentals category
-    # Use direct filtering confirmed by browser research: minBedrooms and exact=true
-    marketplace_url = f'https://www.facebook.com/marketplace/{city}/propertyrentals/?maxPrice={max_price}&exact=true'
-    if bedrooms is not None:
-        marketplace_url += f'&minBedrooms={bedrooms}'
+    # exact=true helps limit to the specified bounds
+    marketplace_url = f'https://www.facebook.com/marketplace/{city}/propertyrentals/?exact=true'
         
     initial_url = "https://www.facebook.com/login/device-based/regular/login/"
     # Get listings of particular item in a particular city for a particular price.
