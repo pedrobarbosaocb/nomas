@@ -33,7 +33,7 @@ def generate_listing_id(listing: dict) -> str:
 def main():
     parser = argparse.ArgumentParser(description="Scrape Kijiji listings securely for AI labeling.")
     parser.add_argument("--limit", type=int, default=5000, help="Maximum number of listings to scrape.")
-    parser.add_argument("--out", type=str, default="data/raw/kijiji_canada_unlabeled.json", help="Relative output file path.")
+    parser.add_argument("--out", type=str, default="classifier/training_data/kijiji_canada_unlabeled.json", help="Relative output file path.")
     parser.add_argument("--workers", type=int, default=12, help="Number of CPU threads to use for speed.")
     args = parser.parse_args()
 
@@ -70,9 +70,15 @@ def main():
         except Exception as e:
             print(f"Error loading existing raw data: {e}")
 
-    # Add the new data
+    # Add the new data with only the relevant AI context fields
     for item in scraped_data:
-        raw_data_map[item['id']] = item
+        pruned_item = {
+            'id': item['id'],
+            'title': item.get('title', ''),
+            'description': item.get('description', ''),
+            'link': item.get('link', '')
+        }
+        raw_data_map[item['id']] = pruned_item
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     save_json(list(raw_data_map.values()), str(out_path))
