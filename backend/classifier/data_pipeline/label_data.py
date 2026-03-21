@@ -217,7 +217,7 @@ def main():
     parser.add_argument("--batch-size", type=int, default=10, help="Number of listings to send to Gemini per API call.")
     parser.add_argument("--limit", type=int, default=None, help="Process at most this many unlabeled listings.")
     parser.add_argument("--mock", action="store_true", help="Bypass the API and insert mock classifications.")
-    parser.add_argument("--workers", type=int, default=4, help="Number of concurrent API batches.")
+    parser.add_argument("--workers", type=int, default=3, help="Number of concurrent API batches.")
     parser.add_argument("--retry-unknown", action="store_true", help="Re-process any listings that were previously labeled 'unknown'.")
     args = parser.parse_args()
 
