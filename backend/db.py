@@ -1,24 +1,25 @@
 import os
-import mysql.connector
-from mysql.connector import Error
+import psycopg2
+from psycopg2.extras import DictCursor
+from psycopg2 import Error
 from dotenv import load_dotenv
 
 # Load env variables from backend/.env
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 def get_db_connection():
-    """Returns a connection to the MySQL database."""
+    """Returns a connection to the PostgreSQL database."""
     try:
-        connection = mysql.connector.connect(
+        connection = psycopg2.connect(
             host=os.environ.get("DB_HOST", "localhost"),
-            user=os.environ.get("DB_USER", "root"),
+            user=os.environ.get("DB_USER", "postgres"),
             password=os.environ.get("DB_PASSWORD", ""),
-            database=os.environ.get("DB_NAME", "nomas_db")
+            dbname=os.environ.get("DB_NAME", "nomas_db"),
+            port=os.environ.get("DB_PORT", "5432")
         )
-        if connection.is_connected():
-            return connection
+        return connection
     except Error as e:
-        print(f"Error connecting to MySQL: {e}")
+        print(f"Error connecting to PostgreSQL: {e}")
     return None
 
 def init_db():
@@ -33,9 +34,6 @@ def init_db():
         
     try:
         cursor = conn.cursor()
-        # Create table with fields we expect from scraped items + ai_labels
-        # We use TEXT for description to handle large strings.
-        # id is VARCHAR as the python scraper generates an MD5 hash string.
         create_table_query = """
         CREATE TABLE IF NOT EXISTS listings (
             id VARCHAR(64) PRIMARY KEY,
@@ -57,7 +55,7 @@ def init_db():
     except Error as e:
         print(f"Error initializing database table: {e}")
     finally:
-        if conn and conn.is_connected():
+        if conn and not conn.closed:
             cursor.close()
             conn.close()
 

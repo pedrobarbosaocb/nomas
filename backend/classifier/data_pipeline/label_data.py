@@ -164,7 +164,8 @@ def fetch_unclassified(limit=None, retry_unknown=False):
         return []
 
     try:
-        cursor = conn.cursor(dictionary=True)
+        from psycopg2.extras import DictCursor
+        cursor = conn.cursor(cursor_factory=DictCursor)
         query = "SELECT id, title, description, link FROM listings WHERE ai_label IS NULL"
         if retry_unknown:
             query += " OR ai_label = 'unknown'"
@@ -174,12 +175,12 @@ def fetch_unclassified(limit=None, retry_unknown=False):
             
         cursor.execute(query)
         results = cursor.fetchall()
-        return results
+        return [dict(r) for r in results]
     except Exception as e:
         print(f"Error fetching from DB: {e}")
         return []
     finally:
-        if conn.is_connected():
+        if conn and not conn.closed:
             cursor.close()
             conn.close()
 
@@ -201,12 +202,13 @@ def update_labels_in_db(labels):
         for i_id, label_data in labels.items():
             args_list.append((label_data['str'], label_data['int'], i_id))
             
-        cursor.executemany(update_query, args_list)
+        from psycopg2.extras import execute_batch
+        execute_batch(cursor, update_query, args_list)
         conn.commit()
     except Exception as e:
         print(f"Error updating DB: {e}")
     finally:
-        if conn.is_connected():
+        if conn and not conn.closed:
             cursor.close()
             conn.close()
 
