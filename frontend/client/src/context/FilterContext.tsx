@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
-import apartments from '@/data/apartments.json';
+import React, { createContext, useContext, useState, useMemo, ReactNode, useEffect } from 'react';
 import { unbuiltREMStations } from '@/utils/metro';
 
 export type SortOption = 'default' | 'price_asc' | 'price_desc' | 'distance_asc';
@@ -40,6 +39,9 @@ interface FilterContextType {
   metroGroups: Record<string, string[]>;
   toggleMetro: (metro: string) => void;
   clearFilters: () => void;
+  apartments: any[];
+  setApartments: React.Dispatch<React.SetStateAction<any[]>>;
+  isLoadingListings: boolean;
 }
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
@@ -65,6 +67,22 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     advancedSorting: false,
     advancedSortItems: [{ id: 'price', direction: 'asc' }, { id: 'distance', direction: 'asc' }],
   });
+
+  const [apartments, setApartments] = useState<any[]>([]);
+  const [isLoadingListings, setIsLoadingListings] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/listings')
+      .then(res => res.json())
+      .then(data => {
+        setApartments(data);
+        setIsLoadingListings(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch listings:", err);
+        setIsLoadingListings(false);
+      });
+  }, []);
 
   const clearFilters = () => {
     setFilters({
@@ -114,7 +132,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     });
 
     return Object.fromEntries(Object.entries(groups).filter(([_, list]) => list.length > 0));
-  }, []);
+  }, [apartments]);
 
   const toggleMetro = (metro: string) => {
     setFilters(prev => {
@@ -144,7 +162,10 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       setShowMetroDropdown,
       metroGroups,
       toggleMetro,
-      clearFilters
+      clearFilters,
+      apartments,
+      setApartments,
+      isLoadingListings
     }}>
       {children}
     </FilterContext.Provider>

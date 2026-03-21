@@ -11,9 +11,6 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(script_dir)
 sys.path.append(os.path.join(parent_dir, "Kijiji-Scraper"))
 
-from dotenv import load_dotenv
-load_dotenv(os.path.join(parent_dir, ".env"))
-
 from .base import BaseScraper
 
 try:
@@ -134,10 +131,8 @@ def _scrape_page_worker(city_lower, loc_id, page_num):
 
 
 class KijijiScraper(BaseScraper):
-    def __init__(self, city=None, max_workers=None, max_results=None):
+    def __init__(self, city=None, max_workers=8, max_results=None):
         super().__init__(city)
-        if max_workers is None:
-            max_workers = int(os.environ.get("MAX_THREADS", 3))
         self.max_workers = max_workers
         self.max_results = max_results
         self.city_lower = self.city.lower()
@@ -148,8 +143,7 @@ class KijijiScraper(BaseScraper):
         
         results = []
         page_num = 1
-        # Scale batch size roughly with max workers (cap at 5 for Kijiji ban logic)
-        batch_size = min(5, max(1, self.max_workers // 2))
+        batch_size = 5 # fetch 5 pages concurrently
         
         try:
             while True:

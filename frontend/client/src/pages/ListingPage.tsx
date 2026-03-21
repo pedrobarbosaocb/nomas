@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { Home, ThumbsUp, ThumbsDown } from 'lucide-react';
-import apartments from '@/data/apartments.json';
 import { ApartmentCard } from '@/components/ApartmentCard';
 import { useApartmentRatings } from '@/hooks/useApartmentRatings';
 import { useFilterContext } from '@/context/FilterContext';
@@ -15,12 +14,12 @@ export default function ListingPage() {
   const { t } = useLanguage();
   const [filter, setFilter] = useState<FilterType>('all');
   const [gridCols, setGridCols] = useState<1 | 2 | 3>(2);
-  const { filters, showFilters, setShowFilters, isPinned, isSortPinned } = useFilterContext();
+  const { filters, showFilters, setShowFilters, isPinned, isSortPinned, apartments, isLoadingListings } = useFilterContext();
 
   const filteredApartments = useMemo(() => {
-    let result = apartments.filter(apt => {
+    let result = (apartments || []).filter(apt => {
       // 1. Check local rating filter
-      if (filter !== 'all' && getRating(apt.link) !== filter) return false;
+      if (filter !== 'all' && getRating(apt.id) !== filter) return false;
 
       // 1b. Min Price Filter
       if (filters.minPrice) {
@@ -89,8 +88,8 @@ export default function ListingPage() {
     result.sort((a, b) => {
       // Always push properties marked as "Disliked" to the bottom of the "Todos" list
       if (filter === 'all') {
-        const isDislikedA = getRating(a.link) === 'disliked';
-        const isDislikedB = getRating(b.link) === 'disliked';
+        const isDislikedA = getRating(a.id) === 'disliked';
+        const isDislikedB = getRating(b.id) === 'disliked';
         if (isDislikedA !== isDislikedB) {
           return isDislikedA ? 1 : -1;
         }
@@ -131,12 +130,12 @@ export default function ListingPage() {
     });
 
     return result;
-  }, [filter, getRating, filters]);
+  }, [filter, getRating, filters, apartments]);
 
   const stats = {
-    liked: apartments.filter(apt => getRating(apt.link) === 'liked').length,
-    disliked: apartments.filter(apt => getRating(apt.link) === 'disliked').length,
-    notRated: apartments.filter(apt => getRating(apt.link) === 'not-rated').length,
+    liked: (apartments || []).filter(apt => getRating(apt.id) === 'liked').length,
+    disliked: (apartments || []).filter(apt => getRating(apt.id) === 'disliked').length,
+    notRated: (apartments || []).filter(apt => getRating(apt.id) === 'not-rated').length,
   };
 
   return (
@@ -223,7 +222,13 @@ export default function ListingPage() {
 
         {/* Content */}
         <div className="flex-1 w-full min-w-0">
-          {filteredApartments.length === 0 ? (
+          {isLoadingListings ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 dark:text-gray-400 text-lg animate-pulse">
+                Carregando apartamentos...
+              </p>
+            </div>
+          ) : filteredApartments.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 dark:text-gray-400 text-lg">
                 {t('noApartments')}
@@ -237,11 +242,11 @@ export default function ListingPage() {
             }`}>
               {filteredApartments.map(apartment => (
                 <ApartmentCard
-                  key={apartment.link}
+                  key={apartment.id}
                   apartment={apartment}
-                  rating={getRating(apartment.link)}
-                  onLike={() => toggleLike(apartment.link)}
-                  onDislike={() => toggleDislike(apartment.link)}
+                  rating={getRating(apartment.id)}
+                  onLike={() => toggleLike(apartment.id)}
+                  onDislike={() => toggleDislike(apartment.id)}
                   variant="list"
                 />
               ))}

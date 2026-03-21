@@ -1,5 +1,4 @@
 import { useApartmentRatings } from '@/hooks/useApartmentRatings';
-import apartments from '@/data/apartments.json';
 import { useFilterContext, SortOption } from '@/context/FilterContext';
 import { useState } from 'react';
 import { Filter, Moon, Sun, ArrowUpDown, ChevronDown } from 'lucide-react';
@@ -12,8 +11,8 @@ interface TopRibbonProps {
 }
 
 export function TopRibbon({ currentPage, onPageChange }: TopRibbonProps) {
+  const { showFilters, setShowFilters, filters, showSortSidebar, setShowSortSidebar, apartments } = useFilterContext();
   const { getRating } = useApartmentRatings();
-  const { showFilters, setShowFilters, filters, showSortSidebar, setShowSortSidebar } = useFilterContext();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
 
@@ -26,10 +25,10 @@ export function TopRibbon({ currentPage, onPageChange }: TopRibbonProps) {
   ];
 
   const stats = {
-    total: apartments.length,
-    liked: apartments.filter(apt => getRating(apt.link) === 'liked').length,
-    disliked: apartments.filter(apt => getRating(apt.link) === 'disliked').length,
-    notRated: apartments.filter(apt => getRating(apt.link) === 'not-rated').length,
+    total: apartments?.length || 0,
+    liked: apartments?.filter(apt => getRating(apt.id) === 'liked').length || 0,
+    disliked: apartments?.filter(apt => getRating(apt.id) === 'disliked').length || 0,
+    notRated: apartments?.filter(apt => getRating(apt.id) === 'not-rated').length || 0,
   };
 
   const hasActiveFilters = filters.maxPrice || filters.maxDistanceToMetro || filters.searchText || filters.selectedMetros.length > 0 || filters.furnishedOnly || filters.petsAllowed;

@@ -35,20 +35,14 @@ def main():
     # 3. Enrich Data
     structured_raw, enrichment_texts = enrich_data(all_data)
     
-    # Save raw
+    # Save raw to maintain artifact backup locally if desired (optional)
     raw_file = out_dir / "apartments_raw.json"
     save_json(structured_raw, raw_file)
 
-    # 4. Process/Filter Listings
-    if conf.get("process_listings", True):
-        passed, rejected = process_listings(structured_raw, enrichment_texts, conf)
-        
-        # Save processed
-        save_json(passed, out_dir / "processed_apartments.json")
-        save_json(rejected, out_dir / "rejected_apartments.json")
-        
-        print(f"Done! {len(passed)} accepted, {len(rejected)} rejected.")
-        print(f"Results in {out_dir}/")
+    # 4. Insert Listings to Postgres
+    process_listings(structured_raw)
+    
+    print(f"Results have been synced securely to the Postgres database.")
 
 if __name__ == "__main__":
     if sys.stdout.encoding.lower() != 'utf-8':

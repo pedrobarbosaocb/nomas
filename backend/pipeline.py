@@ -15,58 +15,92 @@ def enrich_data(all_data):
     return structured_raw, enrichment_texts
 
 
-def process_listings(structured_raw, enrichment_texts, conf):
+def process_listings(structured_raw):
     """
-    Performs keyword filtering and batch embedding filtering on the data.
-    Returns two lists: passed listings and rejected listings.
+    Inserts enriched listings directly into the PostgreSQL database.
+    We no longer reject listings on the backend; all filtering is handled 
+    by the frontend UI to preserve data comprehensively.
     """
-    print("\nStarting Filtering & Enrichment...")
-    model = None
-    rej_emb = keep_emb = None
-    if conf.get("use_embeddings", True):
-        model = processor.load_embedding_model()
-        rej_emb, keep_emb = processor.build_anchor_embeddings(model)
+    import json
+    from db.connection import get_db_connection
+    from psycopg2.extras import execute_batch
+    import hashlib
 
-    threshold = conf.get("ai_threshold", 0.55)
-    bedrooms = conf.get("bedrooms", 2)
+    def generate_id_if_missing(item):
+        """Generates an MD5 hash ID if one doesn't exist to prevent duplicates."""
+        if 'id' in item and item['id']:
+            return item['id']
+        info = item.get('info', {})
+        raw_str = str(info.get('title', '')) + str(item.get('link', ''))
+        return hashlib.md5(raw_str.encode('utf-8')).hexdigest()
 
-    # ── Stage A: keyword filter (fast, no model needed) ─────────────────
-    keyword_passed = []   # (item, text) tuples that survived keyword filter
-    passed = []
-    rejected = []
+    print(f"\nInserting {len(structured_raw)} listings into PostgreSQL database...")
+    
+    conn = get_db_connection()
+    if not conn:
+        print("Failed to save to database: connection refused.")
+        return [], []
 
-    for item, t in zip(structured_raw, enrichment_texts):
-        k_rej, k_reason = processor.keyword_filter(item, min_bedrooms=bedrooms, text=t)
-        if k_rej:
-            item_with_reason = dict(item)
-            item_with_reason["reject_reason"] = k_reason
-            rejected.append(item_with_reason)
-        else:
-            keyword_passed.append((item, t))
+    try:
+        cursor = conn.cursor()
+        
+        insert_query = """
+            INSERT INTO listings (
+                id, title, description, link, price, source, 
+                latitude, longitude, nearest_metro,
+                images, location_info, included, details, scores
+            ) 
+            VALUES (
+                %s, %s, %s, %s, %s, %s, 
+                %s, %s, %s,
+                %s, %s, %s, %s, %s
+            )
+            ON CONFLICT (id) DO NOTHING;
+        """
+        
+        args_list = []
+        for item in structured_raw:
+            i_id = generate_id_if_missing(item)
+            
+            info = item.get("info", {})
+            loc = item.get("location_info", {})
+            
+            title = info.get('title', '')
+            desc = info.get('description', '')
+            link = item.get('link', '')
+            price = item.get('price', '')
+            source = info.get('source', '')
+            
+            lat = loc.get('latitude', None)
+            lon = loc.get('longitude', None)
+            metro = loc.get('nearest_metro', None)
+            
+            # JSON stringification for JSONB columns
+            images_json = json.dumps(info.get('images', []))
+            loc_json = json.dumps(loc)
+            inc_json = json.dumps(item.get('included', {}))
+            det_json = json.dumps(item.get('details', {}))
+            scores_json = json.dumps(item.get('scores', {}))
+            
+            args_list.append((
+                i_id, title, desc, link, price, source, 
+                lat, lon, metro,
+                images_json, loc_json, inc_json, det_json, scores_json
+            ))
 
-    # ── Stage B: batch embedding filter ─────────────────────────────────
-    if model and keyword_passed:
-        # Build all snippets at once — model.encode() is called only once
-        snippets = []
-        for item, t in keyword_passed:
-            info = item.get("info", {}) if isinstance(item.get("info"), dict) else {}
-            title = item.get("title", "") or info.get("title", "") or ""
-            desc  = item.get("description", "") or info.get("description", "") or ""
-            snippets.append((title + " " + desc)[:300])
+        execute_batch(cursor, insert_query, args_list)
+        conn.commit()
+        
+        cursor.execute("SELECT COUNT(*) FROM listings;")
+        total_rows = cursor.fetchone()[0]
+        print(f"Insertion complete! The listings table now contains {total_rows} total rows.")
 
-        batch_results = processor.embedding_filter_batch(
-            snippets, model, rej_emb, keep_emb, threshold
-        )
-
-        for (item, _), (e_rej, _, e_reason) in zip(keyword_passed, batch_results):
-            if e_rej:
-                item_with_reason = dict(item)
-                item_with_reason["reject_reason"] = e_reason
-                rejected.append(item_with_reason)
-            else:
-                passed.append(item)
-    else:
-        # No embedding model — everything that passed keyword filter is accepted
-        passed.extend(item for item, _ in keyword_passed)
-
-    return passed, rejected
+    except Exception as e:
+        print(f"Database insertion failed: {e}")
+    finally:
+        if conn and not conn.closed:
+            cursor.close()
+            conn.close()
+            
+    # For compatibility with main.py structure, though the exact dicts are now in the DB
+    return structured_raw, []

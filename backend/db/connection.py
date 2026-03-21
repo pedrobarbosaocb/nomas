@@ -4,8 +4,8 @@ from psycopg2.extras import DictCursor
 from psycopg2 import Error
 from dotenv import load_dotenv
 
-# Load env variables from backend/.env
-load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+# Load env variables from backend/.env (parent directory)
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 def get_db_connection():
     """Returns a connection to the PostgreSQL database."""
@@ -45,12 +45,31 @@ def init_db():
             latitude DECIMAL(9,6),
             longitude DECIMAL(9,6),
             nearest_metro VARCHAR(150),
+            images JSONB,
+            location_info JSONB,
+            included JSONB,
+            details JSONB,
+            scores JSONB,
             ai_label VARCHAR(100) DEFAULT NULL,
             ai_label_int INT DEFAULT NULL,
+            preference VARCHAR(20) DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """
         cursor.execute(create_table_query)
+        
+        # Safely add new columns if the table already existed
+        alter_queries = [
+            "ALTER TABLE listings ADD COLUMN IF NOT EXISTS images JSONB",
+            "ALTER TABLE listings ADD COLUMN IF NOT EXISTS location_info JSONB",
+            "ALTER TABLE listings ADD COLUMN IF NOT EXISTS included JSONB",
+            "ALTER TABLE listings ADD COLUMN IF NOT EXISTS details JSONB",
+            "ALTER TABLE listings ADD COLUMN IF NOT EXISTS scores JSONB",
+            "ALTER TABLE listings ADD COLUMN IF NOT EXISTS preference VARCHAR(20) DEFAULT NULL"
+        ]
+        for query in alter_queries:
+            cursor.execute(query)
+            
         conn.commit()
     except Error as e:
         print(f"Error initializing database table: {e}")

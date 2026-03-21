@@ -456,6 +456,7 @@ def enrich(listing: dict, text: str = None) -> dict:
 
     # Rebuild the listing object with nested architecture
     new_listing = {
+        "id": listing.get("id", ""),
         "price": listing.get("price", ""),
         "link": listing.get("link", ""),
         "info": {

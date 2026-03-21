@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
-import apartments from '@/data/apartments.json';
 import { ApartmentCard } from '@/components/ApartmentCard';
 import { useApartmentRatings } from '@/hooks/useApartmentRatings';
 import { useFilterContext } from '@/context/FilterContext';
@@ -13,13 +12,13 @@ export default function TinderPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { t } = useLanguage();
   
-  const { filters, showFilters, setShowFilters, isPinned, isSortPinned, showSortSidebar } = useFilterContext();
+  const { filters, showFilters, setShowFilters, isPinned, isSortPinned, showSortSidebar, apartments, isLoadingListings } = useFilterContext();
 
   // Filtrar apenas apartamentos não avaliados e que batem com o filtro
   const notRatedApartments = useMemo(() => {
-    let result = apartments.filter(apt => {
+    let result = (apartments || []).filter(apt => {
       // 1. Check if rated
-      if (getRating(apt.link) !== 'not-rated') return false;
+      if (getRating(apt.id) !== 'not-rated') return false;
 
       // 1b. Min Price Filter
       if (filters.minPrice) {
@@ -125,7 +124,7 @@ export default function TinderPage() {
     }
 
     return result;
-  }, [getRating, filters]);
+  }, [getRating, filters, apartments]);
 
   // Reset current index if the list shrinks past it
   useMemo(() => {
@@ -150,7 +149,7 @@ export default function TinderPage() {
 
   const handleLike = () => {
     if (currentApartment) {
-      toggleLike(currentApartment.link);
+      toggleLike(currentApartment.id);
       if (currentIndex === notRatedApartments.length - 1) {
         setCurrentIndex(Math.max(0, currentIndex - 1));
       }
@@ -159,14 +158,26 @@ export default function TinderPage() {
 
   const handleDislike = () => {
     if (currentApartment) {
-      toggleDislike(currentApartment.link);
+      toggleDislike(currentApartment.id);
       if (currentIndex === notRatedApartments.length - 1) {
         setCurrentIndex(Math.max(0, currentIndex - 1));
       }
     }
   };
 
-  if (notRatedApartments.length === 0 && apartments.filter(a => getRating(a.link) === 'not-rated').length === 0) {
+  if (isLoadingListings) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center transition-colors">
+        <div className="text-center">
+          <p className="text-gray-500 dark:text-gray-400 text-lg animate-pulse">
+            Carregando apartamentos...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (notRatedApartments.length === 0 && (apartments || []).filter(a => getRating(a.id) === 'not-rated').length === 0) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center transition-colors">
         <div className="text-center">
@@ -184,7 +195,7 @@ export default function TinderPage() {
     );
   }
 
-  const evaluatedCount = apartments.filter(a => getRating(a.link) !== 'not-rated').length;
+  const evaluatedCount = (apartments || []).filter(a => getRating(a.id) !== 'not-rated').length;
 
   return (
     <div className="h-[calc(100dvh-58px)] overflow-hidden bg-transparent flex flex-col items-center">
@@ -216,7 +227,7 @@ export default function TinderPage() {
               {currentApartment ? (
                 <ApartmentCard
                   apartment={currentApartment}
-                  rating={getRating(currentApartment.link)}
+                  rating={getRating(currentApartment.id)}
                   onLike={handleLike}
                   onDislike={handleDislike}
                   variant="tinder"
@@ -243,7 +254,7 @@ export default function TinderPage() {
             <div
               className="bg-emerald-600 h-2 rounded-full transition-all"
               style={{
-                width: `${(evaluatedCount / apartments.length) * 100}%`
+                width: `${(evaluatedCount / Math.max((apartments || []).length, 1)) * 100}%`
               }}
             />
           </div>
