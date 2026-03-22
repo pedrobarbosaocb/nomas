@@ -71,8 +71,10 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const [apartments, setApartments] = useState<any[]>([]);
   const [isLoadingListings, setIsLoadingListings] = useState(true);
 
+  const API_BASE = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000`;
+
   useEffect(() => {
-    fetch('http://localhost:8000/api/listings')
+    fetch(`${API_BASE}/api/listings`)
       .then(res => res.json())
       .then(data => {
         setApartments(data);

@@ -27,8 +27,10 @@ export function useApartmentRatings() {
     if (!targetApt) return;
     const realId = targetApt.id;
 
+    const API_BASE = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000`;
+
     try {
-        await fetch(`http://localhost:8000/api/listings/${encodeURIComponent(realId)}/preference`, {
+        await fetch(`${API_BASE}/api/listings/${encodeURIComponent(realId)}/preference`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

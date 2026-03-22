@@ -1,17 +1,33 @@
 import processor
+import concurrent.futures
+
+def _process_item(item):
+    t = processor.text_for_enrichment(item)
+    enriched = processor.enrich(item, text=t)
+    return enriched, t
 
 def enrich_data(all_data):
     """
-    Computes text_for_enrichment once per listing and enriches the data.
+    Computes text_for_enrichment once per listing and enriches the data concurrently.
     Returns the enriched raw structures and the enrichment texts.
     """
-    print("\nPreparing raw data with consistent structure...")
+    import os
+    max_workers = int(os.environ.get("MAX_THREADS", 10))
+    print(f"\nEnriching {len(all_data)} listings concurrently using {max_workers} threads...")
     structured_raw = []
     enrichment_texts = []
-    for item in all_data:
-        t = processor.text_for_enrichment(item)
-        enrichment_texts.append(t)
-        structured_raw.append(processor.enrich(item, text=t))
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(_process_item, item) for item in all_data]
+        
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                enriched, t = future.result()
+                structured_raw.append(enriched)
+                enrichment_texts.append(t)
+            except Exception as e:
+                print(f"Error enriching item: {e}")
+                
     return structured_raw, enrichment_texts
 
 

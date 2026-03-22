@@ -50,12 +50,12 @@ def get_listings():
             # Re-nest the flattened SQL columns back into the rich frontend-expected structure
             item = {
                 "id": r["id"],
-                "price": r["price"],
-                "link": r["link"],
+                "price": r["price"] if r["price"] else "",
+                "link": r["link"] if r["link"] else "",
                 "info": {
-                    "source": r["source"],
-                    "title": r["title"],
-                    "description": r["description"],
+                    "source": r["source"] if r["source"] else "unknown",
+                    "title": r["title"] if r["title"] else "",
+                    "description": r["description"] if r["description"] else "",
                     "images": r["images"] if r["images"] else []
                 },
                 "location_info": r["location_info"] if r["location_info"] else {},

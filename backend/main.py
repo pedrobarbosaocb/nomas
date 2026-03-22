@@ -8,7 +8,9 @@ using single-responsibility modules.
 
 import sys
 import io
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Local pipeline modules
 from config import load_settings
@@ -17,6 +19,15 @@ from pipeline import enrich_data, process_listings
 from utils import save_json
 
 def main():
+    # 0. Load Environment Variables from backend/.env
+    env_path = Path(__file__).parent / ".env"
+    load_dotenv(dotenv_path=env_path)
+
+    import argparse
+    parser = argparse.ArgumentParser(description="Apartment Finder Pipeline")
+    parser.add_argument("--skip-scrape", action="store_true", help="Skip scraping and load from the last backup instead.")
+    args = parser.parse_args()
+
     # 1. Load configuration
     conf_path = Path(__file__).parent / "settings" / "search_settings.json"
     conf = load_settings(str(conf_path))
@@ -32,12 +43,23 @@ def main():
     out_dir.mkdir(exist_ok=True)
 
     # 2. Run Scrapers
-    all_data = run_scrapers(city, max_results, max_pages)
+    if args.skip_scrape:
+        import json
+        backup_file = out_dir / "scraped_backup.json"
+        if backup_file.exists():
+            print(f"\n[Recovery Mode] Skipping scraping. Loading data directly from {backup_file}...")
+            with open(backup_file, 'r', encoding='utf-8') as f:
+                all_data = json.load(f)
+        else:
+            print(f"Error: --skip-scrape was used but {backup_file} does not exist.")
+            return
+    else:
+        all_data = run_scrapers(city, max_results, max_pages)
 
     # 3. Enrich Data
     structured_raw, enrichment_texts = enrich_data(all_data)
     
-    # Save raw to maintain artifact backup locally if desired (optional)
+    # Save enriched but unlabelled raw locally
     raw_file = out_dir / "apartments_raw.json"
     save_json(structured_raw, raw_file)
 

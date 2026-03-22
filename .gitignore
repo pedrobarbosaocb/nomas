@@ -107,3 +107,6 @@ temp/
 
 # test data
 frontend/client/src/data/apartments.json
+
+# data
+data/*

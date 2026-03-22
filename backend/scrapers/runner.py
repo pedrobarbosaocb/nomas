@@ -24,4 +24,13 @@ def run_scrapers(city, max_results=None, max_pages=100):
             except Exception as exc:
                 print(f"A scraper generated an exception: {exc}")
                 
+    # Delegate backup save intrinsically to the scraper framework
+    import json
+    import os
+    backup_path = os.path.join("data", "scraped_backup.json")
+    os.makedirs("data", exist_ok=True)
+    with open(backup_path, 'w', encoding='utf-8') as f:
+        json.dump(all_data, f, indent=4, ensure_ascii=False)
+    print(f"\n[Scraper Framework] Intercepted and structurally backed up {len(all_data)} listings to {backup_path}")
+
     return all_data
