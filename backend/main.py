@@ -18,9 +18,10 @@ from utils import save_json
 
 def main():
     # 1. Load configuration
-    conf = load_settings("settings/search_settings.json")
+    conf_path = Path(__file__).parent / "settings" / "search_settings.json"
+    conf = load_settings(str(conf_path))
     if not conf:
-        print("Error: settings/search_settings.json not found.")
+        print(f"Error: {conf_path} not found.")
         return
 
     city = conf.get("city", "montreal")
