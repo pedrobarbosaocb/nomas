@@ -2,13 +2,13 @@ import concurrent.futures
 from .kijiji import KijijiScraper
 from .facebook import FacebookScraper
 
-def run_scrapers(city, max_results=None):
+def run_scrapers(city, max_results=None, max_pages=100):
     """
     Initialize and run the configured scrapers concurrently,
     returning a flattened list of all scraped listings.
     """
     scrapers = [
-        KijijiScraper(city=city, max_results=max_results),
+        KijijiScraper(city=city, max_results=max_results, max_pages=max_pages),
         FacebookScraper(city=city, max_results=max_results)
     ]
     

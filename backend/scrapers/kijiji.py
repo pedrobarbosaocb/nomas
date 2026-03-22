@@ -124,17 +124,18 @@ def _scrape_page_worker(city_lower, loc_id, page_num):
     """
     Worker function: fetches a single search results page and returns its ads.
     """
-    url = f"https://www.kijiji.ca/b-apartments-condos/{city_lower}/page-{page_num}/c30349001l{loc_id}"
+    url = f"https://www.kijiji.ca/b-apartments-condos/{city_lower}/page-{page_num}/c30349001l{loc_id}?sort=dateDesc"
     scraper = KijijiAPI(filename=None)
     ads, _ = scraper.scrape_kijiji_for_ads(url, multi_page=False)
     return page_num, ads
 
 
 class KijijiScraper(BaseScraper):
-    def __init__(self, city=None, max_workers=8, max_results=None):
+    def __init__(self, city=None, max_workers=8, max_results=None, max_pages=100):
         super().__init__(city)
         self.max_workers = max_workers
         self.max_results = max_results
+        self.max_pages = max_pages
         self.city_lower = self.city.lower()
         self.loc_id = KIJIJI_LOCATIONS.get(self.city_lower, "0")
 
@@ -209,9 +210,8 @@ class KijijiScraper(BaseScraper):
                 page_num += batch_size
                 
                 # Safety break to avoid infinite loops
-                # 500 pages limit translates to roughly 20,000 listings
-                if page_num > 500:
-                    print("  > Reached hard limit of 500 pages. Stopping.")
+                if page_num > self.max_pages:
+                    print(f"  > Reached configured limit of {self.max_pages} pages. Stopping.")
                     break
 
         except Exception as e:

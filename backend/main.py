@@ -26,12 +26,13 @@ def main():
 
     city = conf.get("city", "montreal")
     max_results = conf.get("max_results", None)
+    max_pages = conf.get("max_pages", 100)
     
     out_dir = Path(conf.get("output_dir", "data/"))
     out_dir.mkdir(exist_ok=True)
 
     # 2. Run Scrapers
-    all_data = run_scrapers(city, max_results)
+    all_data = run_scrapers(city, max_results, max_pages)
 
     # 3. Enrich Data
     structured_raw, enrichment_texts = enrich_data(all_data)
