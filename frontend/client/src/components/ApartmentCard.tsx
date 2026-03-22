@@ -78,16 +78,39 @@ const rawMetroColors: Record<string, string> = {
   REM: '#A2C510' 
 };
 
+function getLocationDisplay(location_info: Apartment['location_info']): string {
+  if (location_info.address && location_info.address.trim()) {
+    return location_info.address.trim();
+  }
+  // Build from nearest_metro if available
+  const parts: string[] = [];
+  if (location_info.nearest_metro && location_info.nearest_metro !== 'Unknown') {
+    const station = getStationByName(location_info.nearest_metro);
+    const name = station ? station.names[0] : location_info.nearest_metro;
+    parts.push(`Near ${name} metro`);
+  }
+  if (location_info.precision && location_info.precision !== 'unknown') {
+    parts.push(location_info.precision);
+  }
+  return parts.length > 0 ? parts.join(' · ') : 'Montréal';
+}
+
 function formatMetroLine(metro: string, t: (key: string) => string) {
+  let name = metro;
+  let lines: string[] = [];
+  
   const match = metro.match(/(.*?)\s*\((.*?)\)/);
-  if (!match) return <span className="text-gray-900 dark:text-gray-100">{metro}</span>;
+  if (match) {
+    name = match[1].trim();
+    lines = [match[2]];
+  }
   
-  const [_, name, colorStr] = match;
-  
-  // Try to find if this station is an intersection
-  let lines = getLinesForStationName(name);
-  if (lines.length === 0) {
-    lines = [colorStr]; // fallback if not found in dataset
+  const station = getStationByName(name);
+  if (station) {
+    name = station.names[0];
+    lines = station.lines;
+  } else if (!match) {
+    return <span className="text-gray-900 dark:text-gray-100">{metro}</span>;
   }
   
   return (
@@ -96,7 +119,7 @@ function formatMetroLine(metro: string, t: (key: string) => string) {
         {lines.map(line => (
           <span 
             key={line} 
-            className="w-2.5 h-2.5 rounded-full" 
+            className="w-2.5 h-2.5 rounded-full shadow-[0_0_2px_rgba(0,0,0,0.2)]" 
             style={{ backgroundColor: rawMetroColors[line] || '#666' }} 
             title={t(`line${line === 'Other' ? 'Other' : line}`) || line}
           />
@@ -236,7 +259,7 @@ export function ApartmentCard({
   rating,
   onLike,
   onDislike,
-  variant = 'list'
+  variant = 'tinder'
 }: ApartmentCardProps) {
   const { t } = useLanguage();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -290,13 +313,16 @@ export function ApartmentCard({
     }
   };
 
-  if (variant === 'tinder') {
-    return (
-      <>
-        <div className={`w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg flex flex-col h-full overflow-hidden transition-colors`}>
+  return (
+    <>
+      <div className={`w-full bg-white dark:bg-gray-900 border rounded-lg shadow-lg flex flex-col h-full overflow-hidden transition-colors ${variant === 'list' ? 'min-h-[520px]' : ''} ${
+        rating === 'liked' ? 'border-emerald-200 dark:border-emerald-800 ring-1 ring-emerald-50 dark:ring-emerald-900/30' : 
+        rating === 'disliked' ? 'border-red-200 dark:border-red-800 opacity-60' : 
+        'border-gray-200 dark:border-gray-800 hover:border-emerald-200 dark:hover:border-emerald-800/50'
+      }`}>
         {/* Image Header */}
         <div 
-          className="h-[45%] min-h-[200px] max-h-[450px] relative bg-gray-100 dark:bg-gray-950 flex-shrink-0 group"
+          className={`${variant === 'list' ? 'h-[240px]' : 'h-[45%] min-h-[200px] max-h-[450px]'} relative bg-gray-100 dark:bg-gray-950 flex-shrink-0 group`}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -371,7 +397,7 @@ export function ApartmentCard({
                 {apartment.price}
               </p>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                📍 {apartment.location_info.address}
+                📍 {getLocationDisplay(apartment.location_info)}
               </p>
               {apartment.location_info.nearest_metro && (
                 <div className="mt-2 flex items-center gap-1.5 flex-wrap">
@@ -455,174 +481,6 @@ export function ApartmentCard({
         onLike={onLike} 
         onDislike={onDislike} 
       />
-      </>
-    );
-  }
-
-  // Variant: list
-  return (
-    <>
-      <div className={`h-full min-h-[520px] overflow-hidden border rounded-xl transition-all hover:shadow-lg flex flex-col bg-white dark:bg-gray-900 ${
-      rating === 'liked' ? 'border-emerald-200 dark:border-emerald-800 ring-1 ring-emerald-50 dark:ring-emerald-900/30' : 
-      rating === 'disliked' ? 'border-red-200 dark:border-red-800 opacity-60' : 
-      'border-gray-200 dark:border-gray-800 hover:border-emerald-200 dark:hover:border-emerald-800/50'
-    }`}>
-      {/* List Image */}
-      <div 
-        className="h-[240px] w-full flex-shrink-0 relative group bg-gray-100 dark:bg-gray-950"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        <img 
-          src={mainImage} 
-          alt={apartment.info.title} 
-          className="w-full h-full object-cover select-none"
-          draggable={false}
-        />
-        
-        {images.length > 1 && (
-          <>
-            <div 
-              className="absolute top-0 left-0 w-1/2 h-full z-10 cursor-pointer"
-              onClick={handlePrevImage}
-            />
-            <div 
-              className="absolute top-0 right-0 w-1/2 h-full z-10 cursor-pointer"
-              onClick={handleNextImage}
-            />
-
-            <div className="absolute inset-y-0 left-1 flex items-center shrink-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="bg-black/30 text-white p-0.5 rounded-full backdrop-blur-sm">
-                <ChevronLeft size={16} />
-              </div>
-            </div>
-            <div className="absolute inset-y-0 right-1 flex items-center shrink-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="bg-black/30 text-white p-0.5 rounded-full backdrop-blur-sm">
-                <ChevronRight size={16} />
-              </div>
-            </div>
-
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-20 pointer-events-none px-2 flex-wrap pb-1">
-              {images.map((_, idx) => (
-                <div 
-                  key={idx}
-                  className={`w-1 h-1 rounded-full shadow-sm transition-all ${
-                    idx === currentImageIndex ? 'bg-white w-2' : 'bg-white/60'
-                  }`}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        <div className="absolute top-2 left-2 flex gap-1 flex-col z-30 pointer-events-none">
-          <span className="bg-white/90 backdrop-blur-sm text-[10px] font-bold px-2 py-1 rounded shadow-sm text-gray-800 uppercase">
-            {apartment.info.source}
-          </span>
-        </div>
-      </div>
-
-      <div className="p-5 flex-1 flex flex-col min-w-0 @container">
-        <div className="flex flex-col mb-2">
-          <div className="flex justify-end mb-1.5">
-            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap flex-shrink-0 border ${statusColors[rating]}`}>
-              {getStatusLabel(rating, t)}
-            </span>
-          </div>
-          <h3 
-            onClick={() => setIsModalOpen(true)}
-            className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-3 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-            title="Expandir detalhes"
-          >
-            {apartment.info.title}
-          </h3>
-        </div>
-
-        <div className="mb-3">
-          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-500 mb-0.5">
-            {apartment.price}
-          </p>
-          <div className="flex flex-col gap-0.5">
-            <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5 truncate">
-              <span className="text-gray-400 dark:text-gray-500">📍</span> {apartment.location_info.address}
-            </p>
-            {apartment.location_info.nearest_metro && (
-              <div className="mt-1.5 flex items-center gap-1.5 truncate">
-                <span className="text-gray-400 dark:text-gray-500">🚇</span>
-                {formatMetroLine(apartment.location_info.nearest_metro, t)}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex-1 min-h-0 flex flex-col relative mb-4">
-          <div className={`relative ${apartment.info.description.length > 150 ? 'max-h-[72px] overflow-hidden' : ''}`}>
-            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              {apartment.info.description}
-            </p>
-            {apartment.info.description.length > 150 && (
-              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none" />
-            )}
-          </div>
-          {apartment.info.description.length > 150 && (
-            <div className="flex justify-center -mt-2 relative z-10 pb-1">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center justify-center h-6 px-3 text-emerald-600 dark:text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400 font-semibold text-xs transition-colors rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-900/30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm"
-              >
-                {t('readMore')}
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-2 mt-auto">
-          <div className="flex gap-2">
-            <button
-              onClick={onDislike}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-                rating === 'disliked'
-                  ? 'bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/40 dark:text-red-400 dark:border-red-800'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-800 dark:hover:bg-red-950/30 dark:hover:text-red-400 dark:hover:border-red-900'
-              }`}
-            >
-              <ThumbsDown size={16} className="shrink-0" />
-              <span className="hidden @[280px]:inline">{t('btnDislike')}</span>
-            </button>
-            <button
-              onClick={onLike}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-                rating === 'liked'
-                  ? 'bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-400 dark:border-emerald-800'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 dark:bg-gray-950 dark:text-gray-300 dark:border-gray-800 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 dark:hover:border-emerald-900'
-              }`}
-            >
-              <ThumbsUp size={16} className="shrink-0" />
-              <span className="hidden @[280px]:inline">{t('btnLike')}</span>
-            </button>
-          </div>
-          <a
-            href={apartment.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Ver anúncio original"
-            className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm w-full dark:bg-gray-950 dark:text-gray-300 dark:border-gray-800 dark:hover:bg-gray-800 dark:hover:text-gray-100"
-          >
-            <span className="hidden @[280px]:inline">{t('viewOriginalAd')}</span>
-            <ExternalLink size={16} className="shrink-0" />
-          </a>
-        </div>
-      </div>
-    </div>
-    <ApartmentDetailsModal 
-      isOpen={isModalOpen} 
-      onClose={() => setIsModalOpen(false)} 
-      apartment={apartment} 
-      rating={rating} 
-      onLike={onLike} 
-      onDislike={onDislike} 
-    />
     </>
   );
 }
@@ -784,7 +642,7 @@ function ApartmentDetailsModal({
                   </span>
                 </div>
                 <p className="text-gray-600 dark:text-gray-400 flex items-center gap-1.5 text-lg">
-                  📍 {apartment.location_info.address}
+                  📍 {getLocationDisplay(apartment.location_info)}
                 </p>
                 {apartment.location_info.nearest_metro && (
                   <div className="mt-2 flex items-center gap-1.5">

@@ -2,6 +2,7 @@ import metroDataRaw from '@/data/metro_stations.json';
 
 export interface StationInfo {
   name: string;
+  name_normalized?: string;
   coords: [number, number];
 }
 
@@ -11,6 +12,7 @@ export interface LineData {
 
 export interface MergedStation {
   names: string[];
+  name_normalized: string;
   coords: [number, number];
   lines: string[];
   contextKeys: string[];
@@ -54,7 +56,8 @@ export function getMergedStations(): MergedStation[] {
         return dist < 0.003; 
       });
 
-      const contextKey = `${station.name} (${lineName})`;
+      const normName = station.name_normalized || normalize(station.name);
+      const contextKey = station.name;
 
       if (existing) {
         if (!existing.lines.includes(lineName)) existing.lines.push(lineName);
@@ -63,6 +66,7 @@ export function getMergedStations(): MergedStation[] {
       } else {
         merged.push({
           names: [station.name],
+          name_normalized: contextKey,
           coords: station.coords,
           lines: [lineName],
           contextKeys: [contextKey]

@@ -154,7 +154,7 @@ def _load_metro_data() -> dict:
     if _metro_data_cache is not None:
         return _metro_data_cache
 
-    data_dir = Path(__file__).parent / "data"
+    data_dir = Path(__file__).parent / "data" / "metro"
     norm_file = data_dir / "metro_stations_montreal_normalized.json"
     orig_file = data_dir / "metro_stations_montreal.json"
 
@@ -244,9 +244,14 @@ def geocode_address(address, city="Montreal"):
         pass
     return None
 
+import unicodedata
+
 def normalize_text(text):
-    """Normalize text for better matching (removes punctuation, collapses spaces)."""
-    text = re.sub(r'[^a-zA-Z0-9]', ' ', text or "")
+    """Normalize text for better matching (removes punctuation, collapses spaces, strips accents)."""
+    if not text:
+        return ""
+    text = "".join(c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn")
+    text = re.sub(r'[^a-zA-Z0-9]', ' ', text)
     return re.sub(r'\s+', ' ', text).strip().lower()
 
 def extract_metro_from_text(text, station_data):
@@ -443,7 +448,7 @@ def enrich(listing: dict, text: str = None) -> dict:
     dist_to_metro = None
     if lat and lon and metro_data:
         best_station, best_line, dist = get_nearest_metro(lat, lon, metro_data)
-        nearest_metro = f"{best_station} ({best_line})"
+        nearest_metro = best_station
         dist_to_metro = dist
 
     # Utility Flags

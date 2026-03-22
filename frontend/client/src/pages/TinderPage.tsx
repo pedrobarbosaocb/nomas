@@ -202,8 +202,8 @@ export default function TinderPage() {
       <div className="relative w-full max-w-[1600px] mx-auto px-4 flex items-center h-full justify-center">
         
         {/* Left Sidebars Container */}
-        <div className={`flex flex-col gap-6 shrink-0 z-40 w-full lg:w-auto ${
-          (isPinned && showFilters) || (isSortPinned && showSortSidebar) ? 'mr-8' : ''
+        <div className={`flex flex-col gap-6 shrink-0 z-40 lg:w-auto ${
+          (isPinned && showFilters) || (isSortPinned && showSortSidebar) ? 'lg:mr-8' : ''
         }`}>
           <SortSidebar />
           <FilterSidebar />
@@ -230,7 +230,6 @@ export default function TinderPage() {
                   rating={getRating(currentApartment.id)}
                   onLike={handleLike}
                   onDislike={handleDislike}
-                  variant="tinder"
                 />
               ) : (
                 <div className="w-full h-full border-2 border-dashed border-gray-300 dark:border-gray-800 rounded-xl flex items-center justify-center bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 p-8 text-center transition-colors">

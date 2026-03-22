@@ -2,7 +2,7 @@
     "city": "montreal",
     "max_price": 1500,
     "bedrooms": 2,
-    "max_pages": 50,
+    "max_pages": 10,
     "process_listings": true,
     "use_embeddings": true,
     "ai_threshold": 0.55,

@@ -22,6 +22,9 @@ Thumbs.db
 *.swo
 *~
 
+# data
+data/*
+
 # ==========================================
 # Backend
 # ==========================================
@@ -30,6 +33,8 @@ backend/Kijiji-Scraper/kijiji_scraper.egg-info/*
 backend/Kijiji-Scraper/dist/*
 backend/Kijiji-Scraper/build/*
 backend/facebook-marketplace-scraper/__pycache__
+backend/data/raw/*
+backend/data/processed/*
 
 # ==========================================
 # Frontend
@@ -107,6 +112,3 @@ temp/
 
 # test data
 frontend/client/src/data/apartments.json
-
-# data
-data/*

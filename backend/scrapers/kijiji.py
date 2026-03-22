@@ -26,6 +26,18 @@ KIJIJI_LOCATIONS = {
     "canada": "0"
 }
 
+# URL path slugs that appear in listing URLs for each city.
+# Kijiji regional searches return nearby suburbs too, so we filter
+# out any listing whose URL slug doesn't match the requested city.
+# An empty list means "no filtering" (used for canada-wide).
+KIJIJI_CITY_URL_SLUGS = {
+    "montreal":  ["ville-de-montreal", "westmount", "montreal-island", "greater-montreal"],
+    "vancouver": ["vancouver", "greater-vancouver", "burnaby", "richmond", "north-vancouver", "west-vancouver", "surrey"],
+    "quebec":    ["ville-de-quebec", "quebec-city", "levis"],
+    "ottawa":    ["ottawa"],
+    "canada":    [],  # no filtering
+}
+
 _HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
 
 
@@ -138,6 +150,13 @@ class KijijiScraper(BaseScraper):
         self.max_pages = max_pages
         self.city_lower = self.city.lower()
         self.loc_id = KIJIJI_LOCATIONS.get(self.city_lower, "0")
+        self.allowed_slugs = KIJIJI_CITY_URL_SLUGS.get(self.city_lower, [])
+
+    def _is_city_match(self, link: str) -> bool:
+        """Returns True if the listing URL belongs to the requested city."""
+        if not self.allowed_slugs:
+            return True  # no filtering for canada-wide
+        return any(f"/{slug}/" in link for slug in self.allowed_slugs)
 
     def search(self):
         print(f"\n[Kijiji] Searching for {self.city} apartments...")
@@ -185,10 +204,14 @@ class KijijiScraper(BaseScraper):
                         for ad_id, ad in new_ads_all.items()
                     }
                     batch_results_count = 0
+                    filtered_count = 0
                     for future in as_completed(futures):
                         try:
                             result = future.result()
                             if result is not None:
+                                if not self._is_city_match(result.get("link", "")):
+                                    filtered_count += 1
+                                    continue  # skip listings from other cities
                                 results.append(result)
                                 batch_results_count += 1
                                 if self.max_results and len(results) >= self.max_results:
@@ -201,7 +224,7 @@ class KijijiScraper(BaseScraper):
                         for future in futures:
                             future.cancel()
                     
-                print(f"  > Extracted {batch_results_count} valid listings from batch. Total so far: {len(results)}")
+                print(f"  > Extracted {batch_results_count} valid listings from batch ({filtered_count} filtered as wrong city). Total so far: {len(results)}")
                 
                 if found_empty_page or (self.max_results and len(results) >= self.max_results):
                     print("  > Reached end of results or requested limit. Stopping.")

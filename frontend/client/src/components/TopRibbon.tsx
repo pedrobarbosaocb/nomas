@@ -11,7 +11,7 @@ interface TopRibbonProps {
 }
 
 export function TopRibbon({ currentPage, onPageChange }: TopRibbonProps) {
-  const { showFilters, setShowFilters, filters, showSortSidebar, setShowSortSidebar, apartments } = useFilterContext();
+  const { showFilters, setShowFilters, filters, showSortSidebar, setShowSortSidebar, apartments, globalStats } = useFilterContext();
   const { getRating } = useApartmentRatings();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
@@ -24,12 +24,7 @@ export function TopRibbon({ currentPage, onPageChange }: TopRibbonProps) {
     { code: 'pt', label: 'Português' },
   ];
 
-  const stats = {
-    total: apartments?.length || 0,
-    liked: apartments?.filter(apt => getRating(apt.id) === 'liked').length || 0,
-    disliked: apartments?.filter(apt => getRating(apt.id) === 'disliked').length || 0,
-    notRated: apartments?.filter(apt => getRating(apt.id) === 'not-rated').length || 0,
-  };
+  const stats = globalStats || { total: 0, liked: 0, disliked: 0, notRated: 0 };
 
   const hasActiveFilters = filters.maxPrice || filters.maxDistanceToMetro || filters.searchText || filters.selectedMetros.length > 0 || filters.furnishedOnly || filters.petsAllowed;
 
@@ -90,7 +85,7 @@ export function TopRibbon({ currentPage, onPageChange }: TopRibbonProps) {
         </div>
 
         {/* Center: App Title */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center h-full pointer-events-none">
+        <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center h-full pointer-events-none">
           <h1 className="text-xl sm:text-2xl font-black tracking-tight text-gray-900 dark:text-white uppercase">
             NOMAS
           </h1>

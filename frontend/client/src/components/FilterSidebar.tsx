@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Map, X, Pin, PinOff } from 'lucide-react';
+import { Map, ChevronDown, Check, SlidersHorizontal, X, Pin, PinOff } from 'lucide-react';
 import { useFilterContext } from '@/context/FilterContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getStationByName } from '@/utils/metro';
 import { MetroMapModal } from '@/components/MetroMapModal';
 
 export function FilterSidebar() {
@@ -16,11 +17,13 @@ export function FilterSidebar() {
     setShowMetroDropdown, 
     metroGroups, 
     toggleMetro, 
-    clearFilters
+    clearFilters,
+    availableAiLabels
   } = useFilterContext();
   const { t } = useLanguage();
 
   const [showMap, setShowMap] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Close metro dropdown whenever the main filter menu closes
@@ -205,7 +208,8 @@ export function FilterSidebar() {
                         <div className="flex flex-col gap-1">
                           {(metros as string[]).map(metro => {
                             const isSelected = filters.selectedMetros.includes(metro);
-                            const cleanLabel = metro.replace(/\s*\(.*?\)\s*/g, '');
+                            const resolved = getStationByName(metro);
+                            const cleanLabel = resolved ? resolved.names[0] : metro.replace(/\s*\(.*?\)\s*/g, '');
                             
                             return (
                               <label
@@ -290,6 +294,114 @@ export function FilterSidebar() {
               </div>
             </div>
           </div>
+
+          {availableAiLabels !== undefined && (
+            <div className="space-y-3 mt-4 mb-4">
+              <div className="flex items-center justify-between pointer-events-none">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">{t('listingType')}</label>
+              </div>
+              
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  className="w-full flex items-center justify-between px-3 py-2 bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-left dark:text-gray-100 shadow-sm"
+                >
+                  <span className={`block truncate ${((filters as any).listingCategory || 'all') === 'all' ? 'text-gray-500 dark:text-gray-400' : 'font-medium'}`}>
+                    {(() => {
+                      const val = (filters as any).listingCategory || 'all';
+                      if (val === 'apartment') return t('catApartment');
+                      if (val === 'commercial') return t('catCommercial');
+                      if (val === 'parking') return t('catParking');
+                      return t('catAll');
+                    })()}
+                  </span>
+                  <ChevronDown size={16} className={`text-gray-500 dark:text-gray-400 transition-transform duration-200 ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showCategoryDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowCategoryDropdown(false)} />
+                    <div className="absolute z-50 w-full mt-2 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                      {[
+                        { value: 'all', label: t('catAll') },
+                        { value: 'apartment', label: t('catApartment') },
+                        { value: 'commercial', label: t('catCommercial') },
+                        { value: 'parking', label: t('catParking') },
+                      ].map(option => {
+                        const isSelected = ((filters as any).listingCategory || 'all') === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => {
+                              setFilters(prev => ({ ...prev, listingCategory: option.value, aiLabels: [] }));
+                              setShowCategoryDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-2.5 text-sm transition-colors ${
+                              isSelected
+                                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {(filters as any).listingCategory === 'apartment' && (
+                <div className="flex flex-wrap gap-2 mt-3 max-h-48 overflow-y-auto custom-scrollbar pb-1">
+                  {availableAiLabels
+                    .filter(l => ["short stay", "room(s) in shared apartment/house", "studio", "1-bed", "2-bed", "3-bed", "4-bed", "5+ bedroom apartment"].includes(l))
+                    .sort((a, b) => {
+                      const order = ["short stay", "room(s) in shared apartment/house", "studio", "1-bed", "2-bed", "3-bed", "4-bed", "5+ bedroom apartment"];
+                      return order.indexOf(a) - order.indexOf(b);
+                    })
+                    .map(label => {
+                      const isSelected = filters.aiLabels?.includes(label);
+                      const keyMap: Record<string, string> = {
+                        "short stay": "labelShortStay",
+                        "room(s) in shared apartment/house": "labelRoom",
+                        "studio": "labelStudio",
+                        "1-bed": "label1Bed",
+                        "2-bed": "label2Bed",
+                        "3-bed": "label3Bed",
+                        "4-bed": "label4Bed",
+                        "5+ bedroom apartment": "label5Bed"
+                      };
+                      const displayLabel = keyMap[label] ? t(keyMap[label]) : label;
+                      
+                      return (
+                        <button
+                          key={label}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setFilters((prev: any) => {
+                              const newLabels = !isSelected
+                                ? [...(prev.aiLabels || []), label]
+                                : (prev.aiLabels || []).filter((l: string) => l !== label);
+                              return { ...prev, aiLabels: newLabels };
+                            });
+                          }}
+                          className={`
+                            text-xs px-3 py-1.5 rounded-full border transition-all duration-200
+                            ${isSelected 
+                              ? 'bg-emerald-100 border-emerald-300 text-emerald-800 dark:bg-emerald-900/40 dark:border-emerald-700/50 dark:text-emerald-300 shadow-sm' 
+                              : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-800/80'}
+                          `}
+                        >
+                          {displayLabel}
+                        </button>
+                      );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4 pt-2">
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
